@@ -1,0 +1,23 @@
+{
+  "name": "project-mt",
+  "version": "1.0.0",
+  "description": "Project_MT is a fitness application that makes transformation tracking more intuitive through reliable set-by-set workout logging, progress tracking, explainable guidance, and interactive 3D body models.",
+  "scripts": {
+    "dev:web": "npm --workspace @project-mt/web run dev",
+    "build:web": "npm --workspace @project-mt/web run build",
+    "lint:web": "npm --workspace @project-mt/web run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eszy09/Project_MT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eszy09/Project_MT/issues"
+  },
+  "homepage": "https://github.com/eszy09/Project_MT#readme",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ]
+}
