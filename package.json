@@ -8,7 +8,8 @@
     "lint:web": "npm --workspace @project-mt/web run lint",
     "typecheck:web": "npm --workspace @project-mt/web run typecheck",
     "format:web": "npm --workspace @project-mt/web run format",
-    "format:check:web": "npm --workspace @project-mt/web run format:check"
+    "format:check:web": "npm --workspace @project-mt/web run format:check",
+    "test:web": "npm --workspace @project-mt/web run test"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,73 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-quality:
+    name: Web quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run ESLint
+        run: npm run lint:web
+
+      - name: Check TypeScript
+        run: npm run typecheck:web
+
+      - name: Run web tests
+        run: npm run test:web
+
+      - name: Build web application
+        run: npm run build:web
+
+  api-quality:
+    name: API quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          cache-dependency-path: apps/api/pom.xml
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x apps/api/mvnw
+
+      - name: Test and build API
+        run: ./apps/api/mvnw --file apps/api/pom.xml --batch-mode --no-transfer-progress verify
