@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.projectmt.api.shared.api.ApiConflictException;
 import com.projectmt.api.support.PostgresTestConfiguration;
+import com.projectmt.api.support.TestSecurityConfiguration;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -27,7 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Import({
   ApiContractTests.ContractProbeController.class,
-  PostgresTestConfiguration.class
+  PostgresTestConfiguration.class,
+  TestSecurityConfiguration.class
 })
 class ApiContractTests {
 
@@ -59,6 +61,7 @@ class ApiContractTests {
   void validationErrorsUseStandardProblemContract() throws Exception {
     var request = HttpRequest
       .newBuilder(uri("/api/v1/test/validation"))
+      .header("Authorization", "Bearer contract-test-user")
       .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
       .POST(HttpRequest.BodyPublishers.ofString("{}"))
       .build();
@@ -75,6 +78,7 @@ class ApiContractTests {
   void conflictsUseStandardProblemContract() throws Exception {
     var request = HttpRequest
       .newBuilder(uri("/api/v1/test/conflict"))
+      .header("Authorization", "Bearer contract-test-user")
       .GET()
       .build();
 
@@ -88,6 +92,7 @@ class ApiContractTests {
   void internalErrorsDoNotExposeSensitiveDetails() throws Exception {
     var request = HttpRequest
       .newBuilder(uri("/api/v1/test/internal"))
+      .header("Authorization", "Bearer contract-test-user")
       .GET()
       .build();
 

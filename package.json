@@ -10,7 +10,8 @@
     "format:web": "npm --workspace @project-mt/web run format",
     "format:check:web": "npm --workspace @project-mt/web run format:check",
     "test:web": "npm --workspace @project-mt/web run test",
-    "generate:api-contract": "npm --workspace @project-mt/api-contract run generate"
+    "generate:api-contract": "npm --workspace @project-mt/api-contract run generate",
+    "check:api-contract": "npm --workspace @project-mt/api-contract run check"
   },
   "repository": {
     "type": "git",
