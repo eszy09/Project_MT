@@ -23,9 +23,42 @@
 		<springdoc.version>3.0.3</springdoc.version>
 		<springdoc.maven-plugin.version>1.5</springdoc.maven-plugin.version>
 		<openapi.port>18080</openapi.port>
+		<openapi.jmx-port>19001</openapi.jmx-port>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -73,6 +106,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 
 				<configuration>
+					<jmxPort>${openapi.jmx-port}</jmxPort>
 					<jvmArguments>
 						-Dspring.application.admin.enabled=true
 					</jvmArguments>
