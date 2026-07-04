@@ -54,6 +54,38 @@ jobs:
     name: API quality
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: project_mt
+          POSTGRES_USER: project_mt
+          POSTGRES_PASSWORD: local-development-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U project_mt -d project_mt"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: jdbc:postgresql://localhost:5432/project_mt
+      DATABASE_USERNAME: project_mt
+      DATABASE_PASSWORD: local-development-only
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          cache-dependency-path: apps/api/pom.xml
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7

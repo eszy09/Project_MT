@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.projectmt.api.shared.api.ApiConflictException;
+import com.projectmt.api.support.PostgresTestConfiguration;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
@@ -23,7 +25,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Import(ApiContractTests.ContractProbeController.class)
+@Import({
+  ApiContractTests.ContractProbeController.class,
+  PostgresTestConfiguration.class
+})
 class ApiContractTests {
 
   private static final HttpClient HTTP_CLIENT =

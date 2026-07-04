@@ -9,6 +9,23 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 20s
 
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/project_mt}
+    username: ${DATABASE_USERNAME:project_mt}
+    password: ${DATABASE_PASSWORD:local-development-only}
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_SIZE:10}
+      minimum-idle: ${DATABASE_MIN_IDLE:1}
+      connection-timeout: 30000
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    validate-migration-naming: true
+    clean-disabled: true
+    out-of-order: false
+
 server:
   port: ${API_PORT:8080}
   shutdown: graceful

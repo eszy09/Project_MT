@@ -1,5 +1,8 @@
 package com.projectmt.api;
 
+import com.projectmt.api.support.PostgresTestConfiguration;
+import org.springframework.context.annotation.Import;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@Import(PostgresTestConfiguration.class)
 class ApiApplicationTests {
 
   @LocalServerPort
