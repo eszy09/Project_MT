@@ -1,4 +1,9 @@
-﻿spring:
+﻿springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+spring:
   application:
     name: project-mt-api
   lifecycle:

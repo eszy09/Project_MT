@@ -9,7 +9,8 @@
     "typecheck:web": "npm --workspace @project-mt/web run typecheck",
     "format:web": "npm --workspace @project-mt/web run format",
     "format:check:web": "npm --workspace @project-mt/web run format:check",
-    "test:web": "npm --workspace @project-mt/web run test"
+    "test:web": "npm --workspace @project-mt/web run test",
+    "generate:api-contract": "npm --workspace @project-mt/api-contract run generate"
   },
   "repository": {
     "type": "git",
