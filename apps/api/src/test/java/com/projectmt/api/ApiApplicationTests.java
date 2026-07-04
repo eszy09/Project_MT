@@ -1,6 +1,7 @@
 package com.projectmt.api;
 
 import com.projectmt.api.support.PostgresTestConfiguration;
+import com.projectmt.api.support.TestSecurityConfiguration;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +17,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Import(PostgresTestConfiguration.class)
+@Import({
+  PostgresTestConfiguration.class,
+  TestSecurityConfiguration.class
+})
 class ApiApplicationTests {
 
   @LocalServerPort

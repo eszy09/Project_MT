@@ -26,6 +26,13 @@ spring:
     clean-disabled: true
     out-of-order: false
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:https://project-mt.invalid/}
+          audiences: ${OIDC_AUDIENCE:https://api.project-mt}
+
 server:
   port: ${API_PORT:8080}
   shutdown: graceful
