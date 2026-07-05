@@ -38,6 +38,15 @@ class DatabaseMigrationTests {
 
     assertTrue(versionTwoApplied);
 
+    boolean versionThreeApplied = Arrays
+      .stream(flyway.info().applied())
+      .anyMatch(migration ->
+        migration.getVersion() != null
+          && "3".equals(migration.getVersion().getVersion())
+      );
+
+    assertTrue(versionThreeApplied);
+
     Integer tableCount = jdbcTemplate.queryForObject(
       """
       SELECT COUNT(*)
@@ -160,6 +169,33 @@ class DatabaseMigrationTests {
         """,
         userId,
         "Second profile"
+      )
+    );
+  }
+
+  @Test
+  void completedOnboardingRequiresGoalsAndTargetAreas() {
+    UUID userId = createUser();
+    UUID profileId = jdbcTemplate.queryForObject(
+      """
+      INSERT INTO user_profiles (user_id, display_name)
+      VALUES (?, ?)
+      RETURNING id
+      """,
+      UUID.class,
+      userId,
+      "Incomplete athlete"
+    );
+
+    assertThrows(
+      DataIntegrityViolationException.class,
+      () -> jdbcTemplate.update(
+        """
+        UPDATE user_profiles
+        SET onboarding_completed_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        profileId
       )
     );
   }

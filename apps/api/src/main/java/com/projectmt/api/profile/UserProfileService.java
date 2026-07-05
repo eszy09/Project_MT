@@ -1,7 +1,10 @@
 package com.projectmt.api.profile;
 
 import com.projectmt.api.auth.CurrentUserService;
+import com.projectmt.api.shared.api.ApiConflictException;
 import com.projectmt.api.shared.api.ApiResourceNotFoundException;
+import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -48,5 +51,60 @@ public final class UserProfileService {
     if (!profiles.deleteByIdForUser(profileId, userId)) {
       throw new ApiResourceNotFoundException();
     }
+  }
+
+  public OnboardingProfile getOnboarding() {
+    UUID userId = currentUsers.requireCurrentUser().id();
+
+    return profiles
+      .findOnboardingForUser(userId)
+      .orElseThrow(ApiResourceNotFoundException::new);
+  }
+
+  public OnboardingProfile saveProfileStage(String displayName) {
+    UUID userId = currentUsers.requireCurrentUser().id();
+
+    return profiles.saveProfileStageForUser(
+      userId,
+      displayName.strip()
+    );
+  }
+
+  public OnboardingProfile saveGoalsStage(
+    PrimaryGoal primaryGoal,
+    Set<TargetArea> targetAreas
+  ) {
+    UUID userId = currentUsers.requireCurrentUser().id();
+
+    return profiles
+      .saveGoalsStageForUser(userId, primaryGoal, targetAreas)
+      .orElseThrow(ApiResourceNotFoundException::new);
+  }
+
+  public OnboardingProfile saveBodyContextStage(
+    ExperienceLevel experienceLevel,
+    BigDecimal heightCm,
+    BigDecimal weightKg
+  ) {
+    UUID userId = currentUsers.requireCurrentUser().id();
+
+    return profiles
+      .saveBodyContextStageForUser(
+        userId,
+        experienceLevel,
+        heightCm,
+        weightKg
+      )
+      .orElseThrow(ApiResourceNotFoundException::new);
+  }
+
+  public OnboardingProfile completeOnboarding() {
+    UUID userId = currentUsers.requireCurrentUser().id();
+
+    return profiles
+      .completeOnboardingForUser(userId)
+      .orElseThrow(() -> new ApiConflictException(
+        "Complete the required profile and goals before finishing onboarding."
+      ));
   }
 }
