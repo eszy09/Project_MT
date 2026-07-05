@@ -116,6 +116,20 @@ public final class GlobalExceptionHandler {
     );
   }
 
+  @ExceptionHandler(ApiResourceNotFoundException.class)
+  public ResponseEntity<ApiProblem> handleResourceNotFound(
+    ApiResourceNotFoundException exception,
+    HttpServletRequest request
+  ) {
+    return response(
+      HttpStatus.NOT_FOUND,
+      ApiErrorCode.RESOURCE_NOT_FOUND,
+      exception.getMessage(),
+      request,
+      List.of()
+    );
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiProblem> handleUnexpectedFailure(
     Exception exception,

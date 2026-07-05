@@ -4,6 +4,25 @@
  */
 
 export interface paths {
+    readonly "/api/v1/profiles/{profileId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get an owned user profile */
+        readonly get: operations["get"];
+        readonly put?: never;
+        readonly post?: never;
+        /** Delete an owned user profile */
+        readonly delete: operations["delete"];
+        readonly options?: never;
+        readonly head?: never;
+        /** Update an owned user profile */
+        readonly patch: operations["update"];
+        readonly trace?: never;
+    };
     readonly "/api/v1": {
         readonly parameters: {
             readonly query?: never;
@@ -49,6 +68,18 @@ export interface components {
             readonly requestId?: string;
             readonly errors?: readonly components["schemas"]["ApiFieldError"][];
         };
+        readonly UpdateProfileRequest: {
+            readonly displayName: string;
+        };
+        readonly ProfileResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly displayName?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
         readonly ApiInfoResponse: {
             readonly name?: string;
             readonly version?: string;
@@ -88,6 +119,17 @@ export interface components {
                 readonly "application/problem+json": components["schemas"]["ApiProblem"];
             };
         };
+        /** @description The requested resource was not found. */
+        readonly ResourceNotFoundProblem: {
+            headers: {
+                /** @description Identifier used to correlate the request. */
+                readonly "X-Request-ID"?: string;
+                readonly [name: string]: unknown;
+            };
+            content: {
+                readonly "application/problem+json": components["schemas"]["ApiProblem"];
+            };
+        };
         /** @description The request conflicts with current state. */
         readonly ConflictProblem: {
             headers: {
@@ -118,6 +160,81 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly get: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly profileId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Profile returned. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ProfileResponse"];
+                };
+            };
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 404: components["responses"]["ResourceNotFoundProblem"];
+        };
+    };
+    readonly delete: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly profileId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Profile deleted. */
+            readonly 204: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 404: components["responses"]["ResourceNotFoundProblem"];
+        };
+    };
+    readonly update: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly profileId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Profile updated. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ProfileResponse"];
+                };
+            };
+            readonly 400: components["responses"]["ValidationProblem"];
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 404: components["responses"]["ResourceNotFoundProblem"];
+        };
+    };
     readonly getApiInfo: {
         readonly parameters: {
             readonly query?: never;

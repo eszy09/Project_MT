@@ -29,26 +29,30 @@ class DatabaseMigrationTests {
 
   @Test
   void flywayMigratesAnEmptyPostgresDatabase() {
-    boolean versionOneApplied = Arrays
+    boolean versionTwoApplied = Arrays
       .stream(flyway.info().applied())
       .anyMatch(migration ->
         migration.getVersion() != null
-          && "1".equals(migration.getVersion().getVersion())
+          && "2".equals(migration.getVersion().getVersion())
       );
 
-    assertTrue(versionOneApplied);
+    assertTrue(versionTwoApplied);
 
     Integer tableCount = jdbcTemplate.queryForObject(
       """
       SELECT COUNT(*)
       FROM information_schema.tables
       WHERE table_schema = 'public'
-        AND table_name IN ('app_users', 'user_identities')
+        AND table_name IN (
+          'app_users',
+          'user_identities',
+          'user_profiles'
+        )
       """,
       Integer.class
     );
 
-    assertEquals(2, tableCount);
+    assertEquals(3, tableCount);
   }
 
   @Test
@@ -115,6 +119,47 @@ class DatabaseMigrationTests {
         UUID.randomUUID(),
         "https://identity.example.test",
         "subject-" + UUID.randomUUID()
+      )
+    );
+  }
+
+  @Test
+  void profileRequiresAnExistingUser() {
+    assertThrows(
+      DataIntegrityViolationException.class,
+      () -> jdbcTemplate.update(
+        """
+        INSERT INTO user_profiles (user_id, display_name)
+        VALUES (?, ?)
+        """,
+        UUID.randomUUID(),
+        "Unknown user"
+      )
+    );
+  }
+
+  @Test
+  void userCanHaveOnlyOneProfile() {
+    UUID userId = createUser();
+
+    jdbcTemplate.update(
+      """
+      INSERT INTO user_profiles (user_id, display_name)
+      VALUES (?, ?)
+      """,
+      userId,
+      "First profile"
+    );
+
+    assertThrows(
+      DataIntegrityViolationException.class,
+      () -> jdbcTemplate.update(
+        """
+        INSERT INTO user_profiles (user_id, display_name)
+        VALUES (?, ?)
+        """,
+        userId,
+        "Second profile"
       )
     );
   }
