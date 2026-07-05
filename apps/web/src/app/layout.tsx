@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthNavigation } from "@/features/auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,9 +33,7 @@ export default function RootLayout({
                 Project_MT
               </span>
 
-              <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-sm text-emerald-300">
-                Foundation
-              </span>
+              <AuthNavigation />
             </div>
           </header>
 
