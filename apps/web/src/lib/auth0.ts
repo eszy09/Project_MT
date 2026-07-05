@@ -7,6 +7,7 @@ const hour = 60 * 60;
 export const auth0 = new Auth0Client({
   authorizationParameters: {
     scope: process.env.AUTH0_SCOPE ?? "openid profile email",
+    audience: process.env.AUTH0_AUDIENCE,
   },
   enableAccessTokenEndpoint: false,
   logoutStrategy: "oidc",

@@ -30,7 +30,16 @@ As a new user, I want to set my goal and target areas so that the app can person
 ### Acceptance criteria
 
 - Required and optional fields are distinguished.
+- Display name, primary goal, and at least one target area are required.
+- Experience level, height, and weight are optional.
+- Each accepted stage is persisted to the authenticated user's profile.
 - Progress survives safe back navigation.
 - Sensitive fields explain why they are requested.
 - Completion takes the user to a useful home state.
+
+### Implementation reference
+
+See
+[`architecture/sequences/ONBOARDING.md`](../architecture/sequences/ONBOARDING.md)
+for the persistence, ownership, and completion sequence.
 

@@ -4,6 +4,74 @@
  */
 
 export interface paths {
+    readonly "/api/v1/profile/onboarding/profile": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Save the profile onboarding stage */
+        readonly put: operations["saveProfile"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/profile/onboarding/goals": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Save the goals onboarding stage */
+        readonly put: operations["saveGoals"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/profile/onboarding/body-context": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Save optional body context */
+        readonly put: operations["saveBodyContext"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/profile/onboarding/complete": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Complete the current user's onboarding */
+        readonly post: operations["complete"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/profiles/{profileId}": {
         readonly parameters: {
             readonly query?: never;
@@ -43,6 +111,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/profile/onboarding": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get the current user's onboarding draft */
+        readonly get: operations["get_1"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -67,6 +152,39 @@ export interface components {
             readonly code?: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "ACCESS_DENIED" | "RESOURCE_NOT_FOUND" | "CONFLICT" | "INTERNAL_ERROR";
             readonly requestId?: string;
             readonly errors?: readonly components["schemas"]["ApiFieldError"][];
+        };
+        readonly ProfileStageRequest: {
+            readonly displayName: string;
+        };
+        readonly OnboardingResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly displayName?: string;
+            /** @enum {string} */
+            readonly primaryGoal?: "BUILD_MUSCLE" | "LOSE_FAT" | "IMPROVE_STRENGTH" | "GENERAL_FITNESS";
+            readonly targetAreas?: readonly ("CHEST" | "BACK" | "SHOULDERS" | "ARMS" | "CORE" | "GLUTES" | "LEGS" | "FULL_BODY")[];
+            /** @enum {string} */
+            readonly experienceLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+            readonly heightCm?: number;
+            readonly weightKg?: number;
+            /** Format: int32 */
+            readonly onboardingStep?: number;
+            readonly completed?: boolean;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly GoalsStageRequest: {
+            /** @enum {string} */
+            readonly primaryGoal: "BUILD_MUSCLE" | "LOSE_FAT" | "IMPROVE_STRENGTH" | "GENERAL_FITNESS";
+            readonly targetAreas: readonly ("CHEST" | "BACK" | "SHOULDERS" | "ARMS" | "CORE" | "GLUTES" | "LEGS" | "FULL_BODY")[];
+        };
+        readonly BodyContextStageRequest: {
+            /** @enum {string} */
+            readonly experienceLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+            readonly heightCm?: number;
+            readonly weightKg?: number;
         };
         readonly UpdateProfileRequest: {
             readonly displayName: string;
@@ -160,6 +278,100 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly saveProfile: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ProfileStageRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OnboardingResponse"];
+                };
+            };
+        };
+    };
+    readonly saveGoals: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["GoalsStageRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OnboardingResponse"];
+                };
+            };
+        };
+    };
+    readonly saveBodyContext: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["BodyContextStageRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OnboardingResponse"];
+                };
+            };
+        };
+    };
+    readonly complete: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Onboarding completed. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OnboardingResponse"];
+                };
+            };
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 409: components["responses"]["ConflictProblem"];
+        };
+    };
     readonly get: {
         readonly parameters: {
             readonly query?: never;
@@ -255,6 +467,28 @@ export interface operations {
                     readonly "application/json": components["schemas"]["ApiInfoResponse"];
                 };
             };
+        };
+    };
+    readonly get_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Draft returned. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OnboardingResponse"];
+                };
+            };
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
 }
