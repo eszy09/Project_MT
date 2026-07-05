@@ -1,6 +1,8 @@
 package com.projectmt.api.config;
 
 import com.projectmt.api.auth.ProjectMtJwtAuthenticationConverter;
+import com.projectmt.api.shared.api.ApiAccessDeniedHandler;
+import com.projectmt.api.shared.api.ApiAuthenticationEntryPoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,13 +21,20 @@ public class SecurityConfiguration {
   @Bean
   SecurityFilterChain apiSecurityFilterChain(
     HttpSecurity http,
-    ProjectMtJwtAuthenticationConverter authenticationConverter
+    ProjectMtJwtAuthenticationConverter authenticationConverter,
+    ApiAuthenticationEntryPoint authenticationEntryPoint,
+    ApiAccessDeniedHandler accessDeniedHandler
   ) throws Exception {
     http
       .csrf(AbstractHttpConfigurer::disable)
       .cors(Customizer.withDefaults())
       .sessionManagement(session ->
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      )
+      .exceptionHandling(exceptions ->
+        exceptions
+          .authenticationEntryPoint(authenticationEntryPoint)
+          .accessDeniedHandler(accessDeniedHandler)
       )
       .authorizeHttpRequests(authorize ->
         authorize
@@ -44,9 +53,12 @@ public class SecurityConfiguration {
           .authenticated()
       )
       .oauth2ResourceServer(oauth2 ->
-        oauth2.jwt(jwt ->
-          jwt.jwtAuthenticationConverter(authenticationConverter)
-        )
+        oauth2
+          .authenticationEntryPoint(authenticationEntryPoint)
+          .accessDeniedHandler(accessDeniedHandler)
+          .jwt(jwt ->
+            jwt.jwtAuthenticationConverter(authenticationConverter)
+          )
       );
 
     return http.build();

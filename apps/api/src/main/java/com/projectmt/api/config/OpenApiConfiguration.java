@@ -42,6 +42,10 @@ public class OpenApiConfiguration {
         problemResponse("The user cannot access this resource.")
       )
       .addResponses(
+        "ResourceNotFoundProblem",
+        problemResponse("The requested resource was not found.")
+      )
+      .addResponses(
         "ConflictProblem",
         problemResponse("The request conflicts with current state.")
       )

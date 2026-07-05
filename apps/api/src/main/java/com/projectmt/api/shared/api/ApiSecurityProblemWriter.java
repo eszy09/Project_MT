@@ -1,0 +1,43 @@
+package com.projectmt.api.shared.api;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
+
+@Component
+public final class ApiSecurityProblemWriter {
+
+  private final ApiProblemFactory problemFactory;
+  private final ObjectMapper objectMapper;
+
+  public ApiSecurityProblemWriter(
+    ApiProblemFactory problemFactory,
+    ObjectMapper objectMapper
+  ) {
+    this.problemFactory = problemFactory;
+    this.objectMapper = objectMapper;
+  }
+
+  public void write(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    HttpStatus status,
+    ApiErrorCode code,
+    String detail
+  ) throws IOException {
+    ApiProblem problem = problemFactory.create(
+      status,
+      code,
+      detail,
+      request
+    );
+
+    response.setStatus(status.value());
+    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+    objectMapper.writeValue(response.getOutputStream(), problem);
+  }
+}

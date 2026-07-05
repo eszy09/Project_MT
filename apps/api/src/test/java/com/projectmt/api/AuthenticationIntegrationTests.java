@@ -3,6 +3,7 @@ package com.projectmt.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.projectmt.api.auth.CurrentUserService;
 import com.projectmt.api.support.PostgresTestConfiguration;
@@ -45,6 +46,15 @@ class AuthenticationIntegrationTests {
     );
 
     assertEquals(401, response.statusCode());
+    assertTrue(
+      response
+        .headers()
+        .firstValue("X-Request-ID")
+        .filter(requestId -> !requestId.equals("unknown"))
+        .isPresent()
+    );
+    assertTrue(response.body().contains("\"code\":\"UNAUTHENTICATED\""));
+    assertTrue(response.body().contains("\"requestId\""));
   }
 
   @Test
@@ -62,6 +72,7 @@ class AuthenticationIntegrationTests {
     var response = authenticatedRequest("expired-test-token");
 
     assertEquals(401, response.statusCode());
+    assertTrue(response.body().contains("\"code\":\"UNAUTHENTICATED\""));
   }
 
   @Test
