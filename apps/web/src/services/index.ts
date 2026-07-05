@@ -6,6 +6,7 @@ export {
   saveGoalsStage,
   saveProfileStage,
 } from "./onboarding-api";
+export { logApiFailure } from "./telemetry";
 
 export type {
   ExperienceLevel,
