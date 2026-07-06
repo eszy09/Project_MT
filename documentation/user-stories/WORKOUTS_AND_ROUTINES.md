@@ -21,6 +21,8 @@ As a returning user, I want to see my previous values so that I can choose today
 - Previous values use the latest relevant completed session.
 - Missing history has a clear empty state.
 - Copying values does not alter historical data.
+- History follows the
+  [pagination and performance design](../architecture/data/WORKOUT_HISTORY.md).
 
 ## US-WO-003: Recover active workout (P1)
 

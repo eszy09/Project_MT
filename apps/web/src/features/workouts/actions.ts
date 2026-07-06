@@ -3,6 +3,7 @@
 import { requireSession } from "@/features/auth";
 import {
   WorkoutApiError,
+  getPreviousPerformance,
   saveCompletedWorkout,
   type WorkoutCompletionInput,
 } from "@/services";
@@ -70,5 +71,36 @@ export async function completeWorkoutAction(
       error: "The workout could not be saved. Try again.",
       requestId: null,
     };
+  }
+}
+
+export async function loadPreviousPerformanceAction(
+  exerciseCode: string,
+): Promise<
+  | {
+      success: true;
+      sets: {
+        position: number;
+        weightKg: string;
+        repetitions: string;
+      }[];
+    }
+  | { success: false }
+> {
+  await requireSession("/workouts/active");
+
+  try {
+    const performance = await getPreviousPerformance(exerciseCode);
+    return {
+      success: true,
+      sets:
+        performance?.sets?.map((set) => ({
+          position: set.position ?? 0,
+          weightKg: String(set.weightKg ?? ""),
+          repetitions: String(set.repetitions ?? ""),
+        })) ?? [],
+    };
+  } catch {
+    return { success: false };
   }
 }

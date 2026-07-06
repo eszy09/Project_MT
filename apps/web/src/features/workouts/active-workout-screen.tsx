@@ -17,7 +17,10 @@ import {
   saveActiveWorkoutDraft,
   type RecoverableWorkoutDraft,
 } from "./active-workout-storage";
-import { completeWorkoutAction } from "./actions";
+import {
+  completeWorkoutAction,
+  loadPreviousPerformanceAction,
+} from "./actions";
 import { exerciseCatalog, type ExerciseCatalogItem } from "./exercise-catalog";
 import { useUnsavedWorkoutWarning } from "./use-unsaved-workout-warning";
 
@@ -149,13 +152,32 @@ export function ActiveWorkoutScreen({
   };
 
   const addExercise = (exercise: ExerciseCatalogItem) => {
+    const exerciseId = crypto.randomUUID();
     dispatch({
       type: "exercise-added",
       exercise,
-      id: crypto.randomUUID(),
+      id: exerciseId,
       setId: crypto.randomUUID(),
     });
     closePicker();
+    void loadPreviousPerformance(exerciseId, exercise.code);
+  };
+
+  const loadPreviousPerformance = async (
+    exerciseId: string,
+    exerciseCode: string,
+  ) => {
+    dispatch({ type: "previous-performance-loading", exerciseId });
+    const result = await loadPreviousPerformanceAction(exerciseCode);
+    dispatch(
+      result.success
+        ? {
+            type: "previous-performance-loaded",
+            exerciseId,
+            sets: result.sets,
+          }
+        : { type: "previous-performance-failed", exerciseId },
+    );
   };
 
   const discardWorkout = () => {
@@ -400,6 +422,13 @@ export function ActiveWorkoutScreen({
                       completedAt: new Date().toISOString(),
                     })
                   }
+                  onCopyPrevious={(setId) =>
+                    dispatch({
+                      type: "previous-values-copied",
+                      exerciseId: exercise.id,
+                      setId,
+                    })
+                  }
                 />
               ))}
             </ol>
@@ -535,6 +564,7 @@ function ExerciseCard({
   onSetValueChange,
   onSetNotesChange,
   onToggleSet,
+  onCopyPrevious,
 }: {
   exercise: WorkoutExerciseDraft;
   position: number;
@@ -551,6 +581,7 @@ function ExerciseCard({
   ) => void;
   onSetNotesChange: (setId: string, notes: string) => void;
   onToggleSet: (setId: string) => void;
+  onCopyPrevious: (setId: string) => void;
 }) {
   return (
     <li className="rounded-2xl border border-white/10 bg-slate-900/70">
@@ -568,6 +599,21 @@ function ExerciseCard({
           <p className="mt-0.5 text-xs text-slate-500">
             {exercise.exerciseCode}
           </p>
+          {exercise.previousStatus === "loading" && (
+            <p className="mt-1 text-xs text-slate-500">
+              Loading previous performance…
+            </p>
+          )}
+          {exercise.previousStatus === "empty" && (
+            <p className="mt-1 text-xs text-slate-500">
+              No previous completed sets
+            </p>
+          )}
+          {exercise.previousStatus === "error" && (
+            <p className="mt-1 text-xs text-amber-300">
+              Previous values unavailable
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -605,6 +651,7 @@ function ExerciseCard({
         onValueChange={onSetValueChange}
         onNotesChange={onSetNotesChange}
         onToggle={onToggleSet}
+        onCopyPrevious={onCopyPrevious}
       />
     </li>
   );
@@ -617,6 +664,7 @@ function SetTable({
   onValueChange,
   onNotesChange,
   onToggle,
+  onCopyPrevious,
 }: {
   exercise: WorkoutExerciseDraft;
   onAdd: () => void;
@@ -628,6 +676,7 @@ function SetTable({
   ) => void;
   onNotesChange: (setId: string, notes: string) => void;
   onToggle: (setId: string) => void;
+  onCopyPrevious: (setId: string) => void;
 }) {
   return (
     <div className="p-3 sm:p-5">
@@ -657,6 +706,7 @@ function SetTable({
             }
             onNotesChange={(notes) => onNotesChange(set.id, notes)}
             onToggle={() => onToggle(set.id)}
+            onCopyPrevious={() => onCopyPrevious(set.id)}
           />
         ))}
       </div>
@@ -682,6 +732,7 @@ function SetRow({
   onValueChange,
   onNotesChange,
   onToggle,
+  onCopyPrevious,
 }: {
   exerciseName: string;
   set: WorkoutSetDraft;
@@ -691,6 +742,7 @@ function SetRow({
   onValueChange: (field: "weightKg" | "repetitions", value: string) => void;
   onNotesChange: (notes: string) => void;
   onToggle: () => void;
+  onCopyPrevious: () => void;
 }) {
   const validation = validateSet(set);
   const weightError =
@@ -717,9 +769,18 @@ function SetRow({
         </span>
 
         <div className="hidden min-h-11 items-center text-sm text-slate-500 sm:flex">
-          {set.previous
-            ? `${set.previous.weightKg} × ${set.previous.repetitions}`
-            : "—"}
+          {set.previous ? (
+            <button
+              type="button"
+              onClick={onCopyPrevious}
+              title="Copy previous values"
+              className="min-h-11 rounded-lg px-2 text-left text-emerald-200 hover:bg-emerald-300/10"
+            >
+              {set.previous.weightKg} × {set.previous.repetitions}
+            </button>
+          ) : (
+            "—"
+          )}
         </div>
 
         <div>

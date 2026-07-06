@@ -62,7 +62,8 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get?: never;
+        /** List the current user's completed workouts */
+        readonly get: operations["history"];
         readonly put?: never;
         /**
          * Save a completed workout atomically
@@ -123,6 +124,40 @@ export interface paths {
          * @description Confirms the active Project_MT API version.
          */
         readonly get: operations["getApiInfo"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/workouts/{workoutId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get one completed workout with ordered details */
+        readonly get: operations["detail"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/workouts/previous/{exerciseCode}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get the latest completed performance for an exercise */
+        readonly get: operations["previousPerformance"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -263,6 +298,67 @@ export interface components {
         readonly ApiInfoResponse: {
             readonly name?: string;
             readonly version?: string;
+        };
+        readonly WorkoutHistoryItemResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly startedAt?: string;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            /** Format: int64 */
+            readonly durationSeconds?: number;
+            readonly notes?: string;
+            /** Format: int32 */
+            readonly exerciseCount?: number;
+            /** Format: int32 */
+            readonly setCount?: number;
+            /** Format: int32 */
+            readonly completedSetCount?: number;
+            readonly completedVolumeKg?: number;
+        };
+        readonly WorkoutHistoryPageResponse: {
+            readonly items?: readonly components["schemas"]["WorkoutHistoryItemResponse"][];
+            readonly nextCursor?: string;
+        };
+        readonly WorkoutDetailResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly startedAt?: string;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            /** Format: int64 */
+            readonly durationSeconds?: number;
+            readonly notes?: string;
+            readonly exercises?: readonly components["schemas"]["WorkoutExerciseDetailResponse"][];
+        };
+        readonly WorkoutExerciseDetailResponse: {
+            /** Format: int32 */
+            readonly position?: number;
+            readonly exerciseCode?: string;
+            readonly displayName?: string;
+            readonly notes?: string;
+            readonly sets?: readonly components["schemas"]["WorkoutSetDetailResponse"][];
+        };
+        readonly WorkoutSetDetailResponse: {
+            /** Format: int32 */
+            readonly position?: number;
+            readonly weightKg?: number;
+            /** Format: int32 */
+            readonly repetitions?: number;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            readonly notes?: string;
+        };
+        readonly PreviousPerformanceResponse: {
+            /** Format: uuid */
+            readonly workoutId?: string;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            readonly exerciseCode?: string;
+            readonly displayName?: string;
+            readonly sets?: readonly components["schemas"]["WorkoutSetDetailResponse"][];
         };
     };
     responses: {
@@ -410,6 +506,34 @@ export interface operations {
                     readonly "application/json": components["schemas"]["OnboardingResponse"];
                 };
             };
+        };
+    };
+    readonly history: {
+        readonly parameters: {
+            readonly query?: {
+                readonly limit?: number;
+                readonly cursor?: string;
+                readonly exerciseCode?: string;
+                readonly from?: string;
+                readonly to?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description History returned. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["WorkoutHistoryPageResponse"];
+                };
+            };
+            readonly 400: components["responses"]["ValidationProblem"];
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
         };
     };
     readonly saveCompletedWorkout: {
@@ -568,6 +692,54 @@ export interface operations {
                     readonly "application/json": components["schemas"]["ApiInfoResponse"];
                 };
             };
+        };
+    };
+    readonly detail: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly workoutId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Workout returned. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["WorkoutDetailResponse"];
+                };
+            };
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 404: components["responses"]["ResourceNotFoundProblem"];
+        };
+    };
+    readonly previousPerformance: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly exerciseCode: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Previous performance returned. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["PreviousPerformanceResponse"];
+                };
+            };
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
     readonly get_1: {

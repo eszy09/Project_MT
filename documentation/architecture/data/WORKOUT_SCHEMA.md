@@ -72,6 +72,7 @@ workout history.
 
 - `(user_id, started_at DESC)` supports a user's chronological session list.
 - `(user_id, completed_at DESC)` supports completed workout history.
+- `(user_id, completed_at DESC, id DESC)` supports stable cursor pagination.
 - `(user_id, exercise_code, workout_session_id)` locates previous performance
   for a specific exercise while preserving ownership filtering.
 
@@ -93,5 +94,6 @@ does not store locale-formatted values.
 
 The schema is introduced by
 `V4__create_workout_schema.sql`. Completion idempotency is introduced by
-`V5__add_workout_completion_idempotency.sql`. Applied migrations remain
-immutable; later changes require a forward-fix migration.
+`V5__add_workout_completion_idempotency.sql`. Stable history pagination is
+indexed by `V6__add_workout_history_cursor_index.sql`. Applied migrations
+remain immutable; later changes require a forward-fix migration.

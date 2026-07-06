@@ -1,6 +1,7 @@
 import type { ExerciseCatalogItem } from "./exercise-catalog";
 
 export type PreviousSetPerformance = {
+  position: number;
   weightKg: string;
   repetitions: string;
 };
@@ -21,6 +22,8 @@ export type WorkoutExerciseDraft = {
   displayName: string;
   notes: string;
   sets: WorkoutSetDraft[];
+  previousSets?: PreviousSetPerformance[];
+  previousStatus?: "loading" | "loaded" | "empty" | "error";
 };
 
 export type CompletedWorkoutSummary = {
@@ -57,6 +60,18 @@ export type ActiveWorkoutAction =
     }
   | {
       type: "set-added";
+      exerciseId: string;
+      setId: string;
+    }
+  | { type: "previous-performance-loading"; exerciseId: string }
+  | {
+      type: "previous-performance-loaded";
+      exerciseId: string;
+      sets: PreviousSetPerformance[];
+    }
+  | { type: "previous-performance-failed"; exerciseId: string }
+  | {
+      type: "previous-values-copied";
       exerciseId: string;
       setId: string;
     }
@@ -160,6 +175,8 @@ export function activeWorkoutReducer(
             displayName: action.exercise.name,
             notes: "",
             sets: [blankSet(action.setId)],
+            previousSets: [],
+            previousStatus: "loading",
           },
         ],
         dirty: true,
@@ -212,6 +229,7 @@ export function activeWorkoutReducer(
     case "set-added":
       return updateExercise(state, action.exerciseId, (exercise) => {
         const previousSet = exercise.sets.at(-1);
+        const position = exercise.sets.length + 1;
 
         return {
           ...exercise,
@@ -221,10 +239,51 @@ export function activeWorkoutReducer(
               ...blankSet(action.setId),
               weightKg: previousSet?.weightKg ?? "",
               repetitions: previousSet?.repetitions ?? "",
+              previous:
+                exercise.previousSets?.find(
+                  (candidate) => candidate.position === position,
+                ) ?? null,
             },
           ],
         };
       });
+
+    case "previous-performance-loading":
+      return updateExercise(state, action.exerciseId, (exercise) => ({
+        ...exercise,
+        previousStatus: "loading",
+      }));
+
+    case "previous-performance-loaded":
+      return updateExercise(state, action.exerciseId, (exercise) => ({
+        ...exercise,
+        previousSets: action.sets,
+        previousStatus: action.sets.length > 0 ? "loaded" : "empty",
+        sets: exercise.sets.map((set, index) => ({
+          ...set,
+          previous:
+            action.sets.find((candidate) => candidate.position === index + 1) ??
+            null,
+        })),
+      }));
+
+    case "previous-performance-failed":
+      return updateExercise(state, action.exerciseId, (exercise) => ({
+        ...exercise,
+        previousStatus: "error",
+      }));
+
+    case "previous-values-copied":
+      return updateSet(state, action.exerciseId, action.setId, (set) =>
+        set.previous
+          ? {
+              ...set,
+              weightKg: set.previous.weightKg,
+              repetitions: set.previous.repetitions,
+              completedAt: null,
+            }
+          : set,
+      );
 
     case "set-removed":
       return updateExercise(state, action.exerciseId, (exercise) => {

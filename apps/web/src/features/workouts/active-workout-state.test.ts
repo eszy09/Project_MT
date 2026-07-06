@@ -299,4 +299,32 @@ describe("activeWorkoutReducer", () => {
     expect(recovered.dirty).toBe(true);
     expect(recovered.error).toBeNull();
   });
+
+  it("loads and copies historical values without mutating history", () => {
+    let state = addExercise(createActiveWorkoutState(startedAt, completionKey));
+    state = activeWorkoutReducer(state, {
+      type: "previous-performance-loaded",
+      exerciseId: "exercise",
+      sets: [
+        {
+          position: 1,
+          weightKg: "90",
+          repetitions: "6",
+        },
+      ],
+    });
+    const historicalSnapshot = state.exercises[0].previousSets;
+
+    state = activeWorkoutReducer(state, {
+      type: "previous-values-copied",
+      exerciseId: "exercise",
+      setId: "exercise-set-1",
+    });
+
+    expect(state.exercises[0].sets[0]).toMatchObject({
+      weightKg: "90",
+      repetitions: "6",
+    });
+    expect(state.exercises[0].previousSets).toBe(historicalSnapshot);
+  });
 });
