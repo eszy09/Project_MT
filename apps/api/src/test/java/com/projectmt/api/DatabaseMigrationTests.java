@@ -56,6 +56,15 @@ class DatabaseMigrationTests {
 
     assertTrue(versionFourApplied);
 
+    boolean versionFiveApplied = Arrays
+      .stream(flyway.info().applied())
+      .anyMatch(migration ->
+        migration.getVersion() != null
+          && "5".equals(migration.getVersion().getVersion())
+      );
+
+    assertTrue(versionFiveApplied);
+
     Integer tableCount = jdbcTemplate.queryForObject(
       """
       SELECT COUNT(*)

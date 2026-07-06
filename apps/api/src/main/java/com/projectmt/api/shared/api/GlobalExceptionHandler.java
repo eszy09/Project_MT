@@ -13,6 +13,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -58,7 +59,8 @@ public final class GlobalExceptionHandler {
 
   @ExceptionHandler({
     HandlerMethodValidationException.class,
-    ConstraintViolationException.class
+    ConstraintViolationException.class,
+    MissingRequestHeaderException.class
   })
   public ResponseEntity<ApiProblem> handleParameterValidation(
     Exception exception,
@@ -70,6 +72,20 @@ public final class GlobalExceptionHandler {
       "One or more request parameters are invalid.",
       request,
       List.of()
+    );
+  }
+
+  @ExceptionHandler(ApiValidationException.class)
+  public ResponseEntity<ApiProblem> handleDomainValidation(
+    ApiValidationException exception,
+    HttpServletRequest request
+  ) {
+    return response(
+      HttpStatus.BAD_REQUEST,
+      ApiErrorCode.VALIDATION_FAILED,
+      exception.getMessage(),
+      request,
+      exception.errors()
     );
   }
 

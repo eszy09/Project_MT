@@ -19,6 +19,8 @@ erDiagram
     timestamptz completed_at
     integer duration_seconds
     varchar notes
+    varchar completion_key
+    char request_fingerprint
   }
 
   WORKOUT_EXERCISES {
@@ -54,6 +56,9 @@ erDiagram
 - Completed sessions have a completion time and duration.
 - In-progress and discarded sessions cannot contain completion metadata.
 - A completed set has both weight and repetitions.
+- A completed session has a user-scoped completion key and payload
+  fingerprint.
+- A completion key cannot identify two different workouts for the same user.
 - Deleting a session deletes its exercise and set children.
 
 ## Historical stability
@@ -87,5 +92,6 @@ does not store locale-formatted values.
 ## Migration
 
 The schema is introduced by
-`V4__create_workout_schema.sql`. Applied migrations remain immutable; later
-changes require a forward-fix migration.
+`V4__create_workout_schema.sql`. Completion idempotency is introduced by
+`V5__add_workout_completion_idempotency.sql`. Applied migrations remain
+immutable; later changes require a forward-fix migration.
