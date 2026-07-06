@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/features/auth";
 import { ActiveWorkoutScreen } from "@/features/workouts";
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ActiveWorkoutPage() {
-  await requireSession("/workouts/active");
+  const session = await requireSession("/workouts/active");
   const profile = await getOnboardingDraft();
 
   if (!profile?.completed) {
@@ -22,6 +22,10 @@ export default async function ActiveWorkoutPage() {
     <ActiveWorkoutScreen
       startedAt={new Date().toISOString()}
       completionKey={randomUUID()}
+      draftOwnerKey={createHash("sha256")
+        .update(session.user.sub)
+        .digest("hex")
+        .slice(0, 32)}
     />
   );
 }

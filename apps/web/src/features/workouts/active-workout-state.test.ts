@@ -258,4 +258,45 @@ describe("activeWorkoutReducer", () => {
     expect(completed.dirty).toBe(false);
     expect(completed.completedWorkout?.id).toBe("workout");
   });
+
+  it("restores a durable draft without transient completion state", () => {
+    const initial = createActiveWorkoutState(
+      "2026-07-06T11:00:00Z",
+      "new-completion-key",
+    );
+    const recovered = activeWorkoutReducer(initial, {
+      type: "draft-recovered",
+      draft: {
+        startedAt,
+        completionKey,
+        notes: "Recovered session",
+        exercises: [
+          {
+            id: "exercise",
+            exerciseCode: "back-squat",
+            displayName: "Back Squat",
+            notes: "",
+            sets: [
+              {
+                id: "set",
+                previous: null,
+                weightKg: "100",
+                repetitions: "5",
+                completedAt: null,
+                notes: "",
+                showValidation: false,
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(recovered.startedAt).toBe(startedAt);
+    expect(recovered.completionKey).toBe(completionKey);
+    expect(recovered.notes).toBe("Recovered session");
+    expect(recovered.status).toBe("editing");
+    expect(recovered.dirty).toBe(true);
+    expect(recovered.error).toBeNull();
+  });
 });

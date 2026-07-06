@@ -11,6 +11,12 @@ import {
   type WorkoutExerciseDraft,
   type WorkoutSetDraft,
 } from "./active-workout-state";
+import {
+  clearActiveWorkoutDraft,
+  loadActiveWorkoutDraft,
+  saveActiveWorkoutDraft,
+  type RecoverableWorkoutDraft,
+} from "./active-workout-storage";
 import { completeWorkoutAction } from "./actions";
 import { exerciseCatalog, type ExerciseCatalogItem } from "./exercise-catalog";
 import { useUnsavedWorkoutWarning } from "./use-unsaved-workout-warning";
@@ -18,9 +24,11 @@ import { useUnsavedWorkoutWarning } from "./use-unsaved-workout-warning";
 export function ActiveWorkoutScreen({
   startedAt,
   completionKey,
+  draftOwnerKey,
 }: {
   startedAt: string;
   completionKey: string;
+  draftOwnerKey: string;
 }) {
   const [state, dispatch] = useReducer(
     activeWorkoutReducer,
@@ -29,7 +37,14 @@ export function ActiveWorkoutScreen({
       createActiveWorkoutState(initialStartedAt, initialCompletionKey),
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [recoveryChecked, setRecoveryChecked] = useState(false);
+  const [recoveryCandidate, setRecoveryCandidate] = useState<{
+    savedAt: string;
+    draft: RecoverableWorkoutDraft;
+  } | null>(null);
+  const [storageWarning, setStorageWarning] = useState<string | null>(null);
   const addExerciseButtonRef = useRef<HTMLButtonElement>(null);
+  const stateRef = useRef(state);
   const elapsedSeconds = useElapsedSeconds(state.startedAt);
   const totalSetCount = state.exercises.reduce(
     (total, exercise) => total + exercise.sets.length,
@@ -44,17 +59,86 @@ export function ActiveWorkoutScreen({
 
   useUnsavedWorkoutWarning(state.dirty && state.status !== "completed");
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const result = loadActiveWorkoutDraft(draftOwnerKey);
+
+      if (result.status === "available") {
+        setRecoveryCandidate({
+          savedAt: result.savedAt,
+          draft: result.draft,
+        });
+      } else if (result.status === "unavailable") {
+        setStorageWarning(
+          "Workout recovery is unavailable in this browser. Keep this page open until your workout is saved.",
+        );
+      }
+
+      setRecoveryChecked(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [draftOwnerKey]);
+
+  useEffect(() => {
+    if (!recoveryChecked || recoveryCandidate) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (state.status === "completed") {
+        clearActiveWorkoutDraft(draftOwnerKey);
+        return;
+      }
+
+      if (state.dirty) {
+        const saved = saveActiveWorkoutDraft(draftOwnerKey, state);
+
+        setStorageWarning(
+          saved
+            ? null
+            : "This workout could not be stored for recovery. Keep this page open until it is saved.",
+        );
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [draftOwnerKey, recoveryCandidate, recoveryChecked, state]);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  useEffect(() => {
+    const persistLatestDraft = () => {
+      const latestState = stateRef.current;
+
+      if (
+        recoveryChecked &&
+        !recoveryCandidate &&
+        latestState.dirty &&
+        latestState.status !== "completed"
+      ) {
+        saveActiveWorkoutDraft(draftOwnerKey, latestState);
+      }
+    };
+
+    window.addEventListener("pagehide", persistLatestDraft);
+    return () => window.removeEventListener("pagehide", persistLatestDraft);
+  }, [draftOwnerKey, recoveryCandidate, recoveryChecked]);
+
   if (state.status === "completed" && state.completedWorkout) {
     return (
       <CompletedWorkoutView
         workout={state.completedWorkout}
-        onStartAnother={() =>
+        onStartAnother={() => {
+          clearActiveWorkoutDraft(draftOwnerKey);
           dispatch({
             type: "discarded",
             startedAt: new Date().toISOString(),
             completionKey: crypto.randomUUID(),
-          })
-        }
+          });
+        }}
       />
     );
   }
@@ -84,6 +168,7 @@ export function ActiveWorkoutScreen({
       return;
     }
 
+    clearActiveWorkoutDraft(draftOwnerKey);
     dispatch({
       type: "discarded",
       startedAt: new Date().toISOString(),
@@ -230,6 +315,16 @@ export function ActiveWorkoutScreen({
               >
                 <CloseIcon />
               </button>
+            </div>
+          )}
+
+          {storageWarning && (
+            <div
+              role="status"
+              className="mt-5 rounded-xl border border-sky-300/25 bg-sky-300/10 p-4 text-sm text-sky-100"
+            >
+              <p className="font-semibold">Recovery notice</p>
+              <p className="mt-1 text-sky-100/80">{storageWarning}</p>
             </div>
           )}
 
@@ -382,6 +477,24 @@ export function ActiveWorkoutScreen({
           }
           onAdd={addExercise}
           onClose={closePicker}
+        />
+      )}
+
+      {recoveryCandidate && (
+        <RecoveryDialog
+          savedAt={recoveryCandidate.savedAt}
+          draft={recoveryCandidate.draft}
+          onResume={() => {
+            dispatch({
+              type: "draft-recovered",
+              draft: recoveryCandidate.draft,
+            });
+            setRecoveryCandidate(null);
+          }}
+          onDiscard={() => {
+            clearActiveWorkoutDraft(draftOwnerKey);
+            setRecoveryCandidate(null);
+          }}
         />
       )}
     </section>
@@ -706,6 +819,101 @@ function SetRow({
           className="mt-1 w-full resize-y rounded-lg border border-white/10 bg-slate-900 p-3 text-sm placeholder:text-slate-600"
         />
       </details>
+    </div>
+  );
+}
+
+function RecoveryDialog({
+  savedAt,
+  draft,
+  onResume,
+  onDiscard,
+}: {
+  savedAt: string;
+  draft: RecoverableWorkoutDraft;
+  onResume: () => void;
+  onDiscard: () => void;
+}) {
+  const resumeButtonRef = useRef<HTMLButtonElement>(null);
+  const setCount = draft.exercises.reduce(
+    (total, exercise) => total + exercise.sets.length,
+    0,
+  );
+
+  useEffect(() => {
+    resumeButtonRef.current?.focus();
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="recovery-dialog-title"
+        aria-describedby="recovery-dialog-description"
+        className="w-full max-w-lg rounded-3xl border border-emerald-300/25 bg-slate-900 p-6 shadow-2xl sm:p-8"
+      >
+        <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-emerald-300/10 text-emerald-300">
+          <RecoveryIcon />
+        </span>
+        <h2 id="recovery-dialog-title" className="mt-5 text-2xl font-bold">
+          Resume your workout?
+        </h2>
+        <p
+          id="recovery-dialog-description"
+          className="mt-2 leading-7 text-slate-300"
+        >
+          An interrupted workout was recovered from this browser. Resume it or
+          discard it and start a new session.
+        </p>
+
+        <dl className="mt-6 grid grid-cols-3 gap-3">
+          <RecoveryMetric label="Exercises" value={draft.exercises.length} />
+          <RecoveryMetric label="Sets" value={setCount} />
+          <RecoveryMetric
+            label="Saved"
+            value={new Intl.DateTimeFormat("en", {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            }).format(new Date(savedAt))}
+          />
+        </dl>
+
+        <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onDiscard}
+            className="min-h-11 rounded-xl border border-red-300/25 px-5 py-2 font-semibold text-red-200 hover:bg-red-300/10"
+          >
+            Discard recovered draft
+          </button>
+          <button
+            ref={resumeButtonRef}
+            type="button"
+            onClick={onResume}
+            className="min-h-11 rounded-xl bg-emerald-300 px-5 py-2 font-bold text-slate-950 hover:bg-emerald-200"
+          >
+            Resume workout
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecoveryMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-slate-950/60 p-3">
+      <dt className="text-xs text-slate-500">{label}</dt>
+      <dd className="mt-1 truncate text-sm font-bold">{value}</dd>
     </div>
   );
 }
@@ -1085,6 +1293,15 @@ function SmallCheckIcon() {
   return (
     <Icon className="size-4">
       <path d="m5 12 4 4L19 6" />
+    </Icon>
+  );
+}
+
+function RecoveryIcon() {
+  return (
+    <Icon>
+      <path d="M4 4v6h6" />
+      <path d="M5.5 15a8 8 0 1 0 .5-7.5L4 10" />
     </Icon>
   );
 }

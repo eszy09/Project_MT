@@ -28,7 +28,8 @@ As a user, I want an interrupted active workout to recover so that a crash or re
 
 ### Acceptance criteria
 
-- Recovery follows the approved draft policy.
+- Recovery follows the approved
+  [active-workout durability policy](../architecture/data/ACTIVE_WORKOUT_DURABILITY.md).
 - Duplicate completion is prevented.
 - The user can discard a recovered draft explicitly.
 

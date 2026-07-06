@@ -7,6 +7,15 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ActiveWorkoutScreen } from "./active-workout-screen";
+import {
+  loadActiveWorkoutDraft,
+  saveActiveWorkoutDraft,
+} from "./active-workout-storage";
+import {
+  activeWorkoutReducer,
+  createActiveWorkoutState,
+} from "./active-workout-state";
+import { exerciseCatalog } from "./exercise-catalog";
 
 const mocks = vi.hoisted(() => ({
   completeWorkoutAction: vi.fn(),
@@ -18,10 +27,15 @@ vi.mock("./actions", () => ({
 
 const startedAt = "2026-07-06T10:00:00Z";
 const completionKey = "completion-key-123";
+const draftOwnerKey = "owner-key-123";
 
 function renderScreen() {
   return render(
-    <ActiveWorkoutScreen startedAt={startedAt} completionKey={completionKey} />,
+    <ActiveWorkoutScreen
+      startedAt={startedAt}
+      completionKey={completionKey}
+      draftOwnerKey={draftOwnerKey}
+    />,
   );
 }
 
@@ -48,8 +62,41 @@ function completeBackSquatSet() {
   );
 }
 
+function storeCompletedBackSquatDraft() {
+  let state = createActiveWorkoutState(startedAt, completionKey);
+  state = activeWorkoutReducer(state, {
+    type: "exercise-added",
+    exercise: exerciseCatalog[0],
+    id: "recovered-exercise",
+    setId: "recovered-set",
+  });
+
+  for (const [field, value] of [
+    ["weightKg", "100"],
+    ["repetitions", "5"],
+  ] as const) {
+    state = activeWorkoutReducer(state, {
+      type: "set-value-changed",
+      exerciseId: "recovered-exercise",
+      setId: "recovered-set",
+      field,
+      value,
+    });
+  }
+
+  state = activeWorkoutReducer(state, {
+    type: "set-completion-toggled",
+    exerciseId: "recovered-exercise",
+    setId: "recovered-set",
+    completedAt: "2026-07-06T10:10:00Z",
+  });
+
+  saveActiveWorkoutDraft(draftOwnerKey, state);
+}
+
 beforeEach(() => {
   mocks.completeWorkoutAction.mockReset();
+  window.localStorage.clear();
 });
 
 afterEach(() => {
@@ -242,6 +289,89 @@ describe("ActiveWorkoutScreen", () => {
     expect(mocks.completeWorkoutAction.mock.calls[1][0].completionKey).toBe(
       completionKey,
     );
+  });
+
+  it("resumes an interrupted draft and reuses its completion key", async () => {
+    storeCompletedBackSquatDraft();
+    mocks.completeWorkoutAction.mockResolvedValue({
+      success: false,
+      error: "Temporary API failure.",
+      requestId: "retry-request-id",
+    });
+
+    renderScreen();
+
+    const dialog = await screen.findByRole("dialog", {
+      name: /resume your workout/i,
+    });
+    const resumeButton = within(dialog).getByRole("button", {
+      name: /resume workout/i,
+    });
+    await waitFor(() => expect(resumeButton).toHaveFocus());
+
+    fireEvent.click(resumeButton);
+
+    expect(
+      screen.getByRole("spinbutton", {
+        name: /back squat set 1 weight in kilograms/i,
+      }),
+    ).toHaveValue(100);
+
+    fireEvent.click(screen.getByRole("button", { name: /complete workout/i }));
+    await waitFor(() =>
+      expect(mocks.completeWorkoutAction).toHaveBeenCalledTimes(1),
+    );
+    expect(mocks.completeWorkoutAction.mock.calls[0][0].completionKey).toBe(
+      completionKey,
+    );
+  });
+
+  it("persists active edits and offers them after a component remount", async () => {
+    const firstRender = renderScreen();
+    addBackSquat();
+    fireEvent.change(
+      screen.getByRole("spinbutton", {
+        name: /back squat set 1 weight in kilograms/i,
+      }),
+      { target: { value: "87.5" } },
+    );
+
+    await waitFor(() =>
+      expect(loadActiveWorkoutDraft(draftOwnerKey).status).toBe("available"),
+    );
+    firstRender.unmount();
+
+    renderScreen();
+    const dialog = await screen.findByRole("dialog", {
+      name: /resume your workout/i,
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /resume workout/i }),
+    );
+
+    expect(
+      screen.getByRole("spinbutton", {
+        name: /back squat set 1 weight in kilograms/i,
+      }),
+    ).toHaveValue(87.5);
+  });
+
+  it("discards a recovered draft explicitly", async () => {
+    storeCompletedBackSquatDraft();
+    renderScreen();
+
+    const dialog = await screen.findByRole("dialog", {
+      name: /resume your workout/i,
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", {
+        name: /discard recovered draft/i,
+      }),
+    );
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByText(/start with your first exercise/i)).toBeVisible();
+    expect(loadActiveWorkoutDraft(draftOwnerKey)).toEqual({ status: "none" });
   });
 
   it("protects unsaved work from refresh and internal navigation", () => {
