@@ -29,6 +29,11 @@ Do not make these decisions silently. Present options, tradeoffs, and a recommen
 7. Preserve current design or redesign
 8. Metric-only or metric and imperial units
 9. Workout draft behavior
+   - Initial browser durability policy approved on 2026-07-06.
+   - See
+     [`ACTIVE_WORKOUT_DURABILITY.md`](../architecture/data/ACTIVE_WORKOUT_DURABILITY.md).
+   - Server-side synchronization, retention changes, and multiple concurrent
+     drafts still require project-owner guidance.
 10. RPE/RIR and rest timer scope
 11. Exercise catalog source
 12. Goal-proximity formula and wording

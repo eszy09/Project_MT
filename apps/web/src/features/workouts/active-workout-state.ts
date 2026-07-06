@@ -96,6 +96,13 @@ export type ActiveWorkoutAction =
       type: "save-completed";
       workout: CompletedWorkoutSummary;
     }
+  | {
+      type: "draft-recovered";
+      draft: Pick<
+        ActiveWorkoutState,
+        "startedAt" | "completionKey" | "notes" | "exercises"
+      >;
+    }
   | { type: "error-dismissed" }
   | {
       type: "discarded";
@@ -326,6 +333,17 @@ export function activeWorkoutReducer(
         error: null,
         requestId: null,
         completedWorkout: action.workout,
+      };
+
+    case "draft-recovered":
+      return {
+        ...state,
+        ...action.draft,
+        status: "editing",
+        dirty: true,
+        error: null,
+        requestId: null,
+        completedWorkout: null,
       };
 
     case "error-dismissed":
