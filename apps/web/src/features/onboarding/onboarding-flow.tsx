@@ -25,7 +25,7 @@ type Props = {
   step: Step;
 };
 
-const initialState = { error: null };
+const initialState = { error: null, requestId: null };
 
 export function OnboardingFlow({ draft, fallbackDisplayName, step }: Props) {
   return (
@@ -385,19 +385,24 @@ function FormFooter({
   pending,
   label,
 }: {
-  state: { error: string | null };
+  state: { error: string | null; requestId: string | null };
   pending: boolean;
   label: string;
 }) {
   return (
     <div className="mt-8">
       {state.error && (
-        <p
+        <div
           role="alert"
           className="mb-4 rounded-lg border border-red-300/30 bg-red-300/10 p-3 text-sm text-red-100"
         >
-          {state.error}
-        </p>
+          <p>{state.error}</p>
+          {state.requestId && (
+            <p className="mt-1 font-mono text-xs text-red-200">
+              Reference: {state.requestId}
+            </p>
+          )}
+        </div>
       )}
       <button
         type="submit"

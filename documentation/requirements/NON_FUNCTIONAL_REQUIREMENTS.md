@@ -41,7 +41,10 @@ Initial numeric targets require owner guidance and production measurement.
 
 ## Operability
 
-- Structured logs with request IDs.
+- ECS JSON logs with `X-Request-ID` correlation and allowlisted metadata only.
+- HTTP latency, status, and outcome metrics through Micrometer/Prometheus.
+- Passwords, tokens, journal content, and body measurements are prohibited
+  from logs and metric tags.
 - Health and readiness endpoints.
 - Metrics for latency, errors, saturation, and critical use cases.
 - Distributed traces across API and background work where useful.

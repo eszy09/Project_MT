@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { requireSession } from "@/features/auth";
 import {
+  OnboardingApiError,
   completeOnboarding,
   saveBodyContextStage,
   saveGoalsStage,
@@ -12,6 +13,7 @@ import type { ExperienceLevel, PrimaryGoal, TargetArea } from "@/services";
 
 export type OnboardingActionState = {
   error: string | null;
+  requestId: string | null;
 };
 
 const goals = new Set<PrimaryGoal>([
@@ -46,13 +48,16 @@ export async function saveProfileAction(
   const displayName = String(formData.get("displayName") ?? "").trim();
 
   if (!displayName || displayName.length > 100) {
-    return { error: "Enter a display name between 1 and 100 characters." };
+    return {
+      error: "Enter a display name between 1 and 100 characters.",
+      requestId: null,
+    };
   }
 
   try {
     await saveProfileStage(displayName);
   } catch (error) {
-    return { error: errorMessage(error) };
+    return actionError(error);
   }
 
   redirect("/onboarding?step=2");
@@ -70,17 +75,20 @@ export async function saveGoalsAction(
     .filter((area): area is TargetArea => targetAreas.has(area as TargetArea));
 
   if (!goals.has(primaryGoal as PrimaryGoal)) {
-    return { error: "Choose one primary goal." };
+    return { error: "Choose one primary goal.", requestId: null };
   }
 
   if (selectedAreas.length === 0) {
-    return { error: "Choose at least one target area." };
+    return {
+      error: "Choose at least one target area.",
+      requestId: null,
+    };
   }
 
   try {
     await saveGoalsStage(primaryGoal as PrimaryGoal, selectedAreas);
   } catch (error) {
-    return { error: errorMessage(error) };
+    return actionError(error);
   }
 
   redirect("/onboarding?step=3");
@@ -101,17 +109,23 @@ export async function saveBodyContextAction(
   const weightKg = optionalNumber(formData.get("weightKg"));
 
   if (heightCm !== null && (heightCm < 50 || heightCm > 300)) {
-    return { error: "Height must be between 50 and 300 cm." };
+    return {
+      error: "Height must be between 50 and 300 cm.",
+      requestId: null,
+    };
   }
 
   if (weightKg !== null && (weightKg < 20 || weightKg > 500)) {
-    return { error: "Weight must be between 20 and 500 kg." };
+    return {
+      error: "Weight must be between 20 and 500 kg.",
+      requestId: null,
+    };
   }
 
   try {
     await saveBodyContextStage({ experienceLevel, heightCm, weightKg });
   } catch (error) {
-    return { error: errorMessage(error) };
+    return actionError(error);
   }
 
   redirect("/onboarding?step=4");
@@ -128,7 +142,7 @@ export async function completeOnboardingAction(
   try {
     await completeOnboarding();
   } catch (error) {
-    return { error: errorMessage(error) };
+    return actionError(error);
   }
 
   redirect("/dashboard");
@@ -145,8 +159,16 @@ function optionalNumber(value: FormDataEntryValue | null) {
   return Number.isFinite(number) ? number : null;
 }
 
-function errorMessage(error: unknown) {
-  return error instanceof Error
-    ? error.message
-    : "We could not save this stage. Try again.";
+function actionError(error: unknown): OnboardingActionState {
+  if (error instanceof OnboardingApiError) {
+    return {
+      error: error.message,
+      requestId: error.requestId,
+    };
+  }
+
+  return {
+    error: "We could not save this stage. Try again.",
+    requestId: null,
+  };
 }

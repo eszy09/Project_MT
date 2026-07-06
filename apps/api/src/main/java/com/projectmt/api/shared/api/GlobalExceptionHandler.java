@@ -1,6 +1,5 @@
 package com.projectmt.api.shared.api;
 
-import com.projectmt.api.shared.web.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -135,13 +134,13 @@ public final class GlobalExceptionHandler {
     Exception exception,
     HttpServletRequest request
   ) {
-    String requestId = RequestIdFilter.getRequestId(request);
-
-    LOGGER.error(
-      "Unhandled API exception for requestId={}",
-      requestId,
-      exception
-    );
+    LOGGER
+      .atError()
+      .addKeyValue(
+        "error.type",
+        exception.getClass().getName()
+      )
+      .log("Unhandled API exception");
 
     return response(
       HttpStatus.INTERNAL_SERVER_ERROR,
