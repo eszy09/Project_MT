@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    readonly "/api/v1/routines/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["get"];
+        readonly put: operations["update"];
+        readonly post?: never;
+        readonly delete: operations["delete"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/profile/onboarding/profile": {
         readonly parameters: {
             readonly query?: never;
@@ -76,6 +92,54 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/routines": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["list"];
+        readonly put?: never;
+        readonly post: operations["create"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/routines/{id}/restore": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["restore"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/routines/{id}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["archive"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/profile/onboarding/complete": {
         readonly parameters: {
             readonly query?: never;
@@ -101,15 +165,15 @@ export interface paths {
             readonly cookie?: never;
         };
         /** Get an owned user profile */
-        readonly get: operations["get"];
+        readonly get: operations["get_1"];
         readonly put?: never;
         readonly post?: never;
         /** Delete an owned user profile */
-        readonly delete: operations["delete"];
+        readonly delete: operations["delete_1"];
         readonly options?: never;
         readonly head?: never;
         /** Update an owned user profile */
-        readonly patch: operations["update"];
+        readonly patch: operations["update_1"];
         readonly trace?: never;
     };
     readonly "/api/v1": {
@@ -174,7 +238,7 @@ export interface paths {
             readonly cookie?: never;
         };
         /** Get the current user's onboarding draft */
-        readonly get: operations["get_1"];
+        readonly get: operations["get_2"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -207,6 +271,56 @@ export interface components {
             readonly code?: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "ACCESS_DENIED" | "RESOURCE_NOT_FOUND" | "CONFLICT" | "INTERNAL_ERROR";
             readonly requestId?: string;
             readonly errors?: readonly components["schemas"]["ApiFieldError"][];
+        };
+        readonly RoutineExerciseRequest: {
+            readonly exerciseCode: string;
+            readonly displayName: string;
+            readonly notes?: string;
+            readonly sets: readonly components["schemas"]["RoutineSetRequest"][];
+        };
+        readonly RoutineRequest: {
+            readonly name: string;
+            readonly description?: string;
+            readonly muscleGroup: string;
+            readonly exercises: readonly components["schemas"]["RoutineExerciseRequest"][];
+        };
+        readonly RoutineSetRequest: {
+            readonly targetWeightKg?: number;
+            /** Format: int32 */
+            readonly targetRepetitions?: number;
+            readonly notes?: string;
+        };
+        readonly RoutineExerciseResponse: {
+            /** Format: int32 */
+            readonly position?: number;
+            readonly exerciseCode?: string;
+            readonly displayName?: string;
+            readonly notes?: string;
+            readonly sets?: readonly components["schemas"]["RoutineSetResponse"][];
+        };
+        readonly RoutineResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly name?: string;
+            readonly description?: string;
+            readonly muscleGroup?: string;
+            /** Format: int32 */
+            readonly version?: number;
+            /** Format: date-time */
+            readonly archivedAt?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            readonly exercises?: readonly components["schemas"]["RoutineExerciseResponse"][];
+        };
+        readonly RoutineSetResponse: {
+            /** Format: int32 */
+            readonly position?: number;
+            readonly targetWeightKg?: number;
+            /** Format: int32 */
+            readonly targetRepetitions?: number;
+            readonly notes?: string;
         };
         readonly ProfileStageRequest: {
             readonly displayName: string;
@@ -436,6 +550,76 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly get: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RoutineResponse"];
+                };
+            };
+        };
+    };
+    readonly update: {
+        readonly parameters: {
+            readonly query: {
+                readonly version: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["RoutineRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RoutineResponse"];
+                };
+            };
+        };
+    };
+    readonly delete: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description No Content */
+            readonly 204: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     readonly saveProfile: {
         readonly parameters: {
             readonly query?: never;
@@ -575,6 +759,100 @@ export interface operations {
             readonly 409: components["responses"]["ConflictProblem"];
         };
     };
+    readonly list: {
+        readonly parameters: {
+            readonly query?: {
+                readonly includeArchived?: boolean;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": readonly components["schemas"]["RoutineResponse"][];
+                };
+            };
+        };
+    };
+    readonly create: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["RoutineRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RoutineResponse"];
+                };
+            };
+        };
+    };
+    readonly restore: {
+        readonly parameters: {
+            readonly query: {
+                readonly version: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RoutineResponse"];
+                };
+            };
+        };
+    };
+    readonly archive: {
+        readonly parameters: {
+            readonly query: {
+                readonly version: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["RoutineResponse"];
+                };
+            };
+        };
+    };
     readonly complete: {
         readonly parameters: {
             readonly query?: never;
@@ -597,7 +875,7 @@ export interface operations {
             readonly 409: components["responses"]["ConflictProblem"];
         };
     };
-    readonly get: {
+    readonly get_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -621,7 +899,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly delete: {
+    readonly delete_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -643,7 +921,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly update: {
+    readonly update_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -742,7 +1020,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly get_1: {
+    readonly get_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;

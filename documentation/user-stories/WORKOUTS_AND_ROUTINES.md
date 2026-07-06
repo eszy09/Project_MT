@@ -44,4 +44,6 @@ As a user, I want a reusable ordered routine so that repeated workouts are faste
 - Routine name, muscle group, exercises, and set templates persist.
 - A workout created from a routine is an independent snapshot.
 - Editing a routine does not change workout history.
+- Persistence and snapshot behavior follow the
+  [routine schema design](../architecture/data/ROUTINE_SCHEMA.md).
 

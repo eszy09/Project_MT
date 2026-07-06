@@ -50,6 +50,12 @@ export default async function DashboardPage() {
             >
               View workout history
             </Link>
+            <Link
+              href="/routines"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/15 px-5 py-2 font-semibold"
+            >
+              Manage routines
+            </Link>
           </div>
         </article>
 

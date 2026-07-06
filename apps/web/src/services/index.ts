@@ -29,3 +29,12 @@ export type {
   WorkoutHistoryItem,
   WorkoutHistoryPage,
 } from "./workout-api";
+export {
+  archiveRoutine,
+  createRoutine,
+  deleteRoutine,
+  getRoutine,
+  listRoutines,
+  updateRoutine,
+} from "./routine-api";
+export type { Routine, RoutineInput } from "./routine-api";

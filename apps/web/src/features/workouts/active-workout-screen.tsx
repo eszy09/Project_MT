@@ -28,16 +28,29 @@ export function ActiveWorkoutScreen({
   startedAt,
   completionKey,
   draftOwnerKey,
+  initialDraft,
 }: {
   startedAt: string;
   completionKey: string;
   draftOwnerKey: string;
+  initialDraft?: RecoverableWorkoutDraft;
 }) {
   const [state, dispatch] = useReducer(
     activeWorkoutReducer,
-    { startedAt, completionKey },
-    ({ startedAt: initialStartedAt, completionKey: initialCompletionKey }) =>
-      createActiveWorkoutState(initialStartedAt, initialCompletionKey),
+    { startedAt, completionKey, initialDraft },
+    ({
+      startedAt: initialStartedAt,
+      completionKey: initialCompletionKey,
+      initialDraft: suppliedDraft,
+    }) => {
+      const initial = createActiveWorkoutState(
+        initialStartedAt,
+        initialCompletionKey,
+      );
+      return suppliedDraft
+        ? { ...initial, ...suppliedDraft, dirty: true }
+        : initial;
+    },
   );
   const [pickerOpen, setPickerOpen] = useState(false);
   const [recoveryChecked, setRecoveryChecked] = useState(false);
