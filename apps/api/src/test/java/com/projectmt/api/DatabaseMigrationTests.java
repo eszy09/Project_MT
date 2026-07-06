@@ -47,6 +47,15 @@ class DatabaseMigrationTests {
 
     assertTrue(versionThreeApplied);
 
+    boolean versionFourApplied = Arrays
+      .stream(flyway.info().applied())
+      .anyMatch(migration ->
+        migration.getVersion() != null
+          && "4".equals(migration.getVersion().getVersion())
+      );
+
+    assertTrue(versionFourApplied);
+
     Integer tableCount = jdbcTemplate.queryForObject(
       """
       SELECT COUNT(*)
@@ -55,13 +64,16 @@ class DatabaseMigrationTests {
         AND table_name IN (
           'app_users',
           'user_identities',
-          'user_profiles'
+          'user_profiles',
+          'workout_sessions',
+          'workout_exercises',
+          'workout_sets'
         )
       """,
       Integer.class
     );
 
-    assertEquals(3, tableCount);
+    assertEquals(6, tableCount);
   }
 
   @Test

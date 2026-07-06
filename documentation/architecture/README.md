@@ -19,6 +19,10 @@
 - [Check-in and body model](sequences/CHECKIN_BODY_MODEL.md)
 - [Media upload](sequences/MEDIA_UPLOAD.md)
 
+## Data model
+
+- [Workout persistence schema](data/WORKOUT_SCHEMA.md)
+
 ## Deployment stages
 
 - [Local development](deployment/01_LOCAL.md)
