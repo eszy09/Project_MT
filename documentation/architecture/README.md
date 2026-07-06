@@ -17,6 +17,7 @@
 - [Authentication](sequences/AUTHENTICATION.md)
 - [Workout lifecycle](sequences/WORKOUT_LIFECYCLE.md)
 - [Check-in and body model](sequences/CHECKIN_BODY_MODEL.md)
+- [Body check-in data policy](data/BODY_CHECKINS.md)
 - [Media upload](sequences/MEDIA_UPLOAD.md)
 
 ## Data model

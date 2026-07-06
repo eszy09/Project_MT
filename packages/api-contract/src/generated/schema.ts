@@ -157,6 +157,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/checkins": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["list_1"];
+        readonly put?: never;
+        readonly post: operations["create_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/profiles/{profileId}": {
         readonly parameters: {
             readonly query?: never;
@@ -239,6 +255,22 @@ export interface paths {
         };
         /** Get the current user's onboarding draft */
         readonly get: operations["get_2"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/checkins/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["get_3"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -396,6 +428,55 @@ export interface components {
             readonly completedSetCount?: number;
             /** Format: date-time */
             readonly createdAt?: string;
+        };
+        readonly BodyCheckinRequest: {
+            /** Format: date-time */
+            readonly measuredAt: string;
+            readonly weight?: components["schemas"]["MeasurementRequest"];
+            readonly bodyFatPercent?: number;
+            readonly chest?: components["schemas"]["MeasurementRequest"];
+            readonly waist?: components["schemas"]["MeasurementRequest"];
+            readonly hips?: components["schemas"]["MeasurementRequest"];
+            readonly arm?: components["schemas"]["MeasurementRequest"];
+            readonly thigh?: components["schemas"]["MeasurementRequest"];
+            readonly notes?: string;
+        };
+        readonly MeasurementRequest: {
+            readonly value: number;
+            readonly unit: string;
+        };
+        readonly BodyCheckinResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly measuredAt?: string;
+            readonly weight?: components["schemas"]["MeasurementResponse"];
+            readonly bodyFatPercent?: number;
+            readonly chest?: components["schemas"]["MeasurementResponse"];
+            readonly waist?: components["schemas"]["MeasurementResponse"];
+            readonly hips?: components["schemas"]["MeasurementResponse"];
+            readonly arm?: components["schemas"]["MeasurementResponse"];
+            readonly thigh?: components["schemas"]["MeasurementResponse"];
+            readonly notes?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly derivedParameters?: components["schemas"]["DerivedParametersResponse"];
+        };
+        readonly DerivedParametersResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly algorithmVersion?: string;
+            readonly torsoScale?: number;
+            readonly waistScale?: number;
+            readonly hipScale?: number;
+            readonly armScale?: number;
+            readonly thighScale?: number;
+            /** Format: date-time */
+            readonly createdAt?: string;
+        };
+        readonly MeasurementResponse: {
+            readonly value?: number;
+            readonly unit?: string;
         };
         readonly UpdateProfileRequest: {
             readonly displayName: string;
@@ -875,6 +956,50 @@ export interface operations {
             readonly 409: components["responses"]["ConflictProblem"];
         };
     };
+    readonly list_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": readonly components["schemas"]["BodyCheckinResponse"][];
+                };
+            };
+        };
+    };
+    readonly create_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["BodyCheckinRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["BodyCheckinResponse"];
+                };
+            };
+        };
+    };
     readonly get_1: {
         readonly parameters: {
             readonly query?: never;
@@ -1040,6 +1165,28 @@ export interface operations {
             };
             readonly 401: components["responses"]["UnauthenticatedProblem"];
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
+        };
+    };
+    readonly get_3: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["BodyCheckinResponse"];
+                };
+            };
         };
     };
 }
