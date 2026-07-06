@@ -55,6 +55,26 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/workouts": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * Save a completed workout atomically
+         * @description Creates the session, ordered exercises, and ordered sets in one transaction.
+         */
+        readonly post: operations["saveCompletedWorkout"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/profile/onboarding/complete": {
         readonly parameters: {
             readonly query?: never;
@@ -185,6 +205,48 @@ export interface components {
             readonly experienceLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
             readonly heightCm?: number;
             readonly weightKg?: number;
+        };
+        readonly WorkoutExerciseRequest: {
+            readonly exerciseCode: string;
+            readonly displayName: string;
+            readonly notes?: string;
+            readonly sets: readonly components["schemas"]["WorkoutSetRequest"][];
+        };
+        readonly WorkoutRequest: {
+            /** Format: date-time */
+            readonly startedAt: string;
+            /** Format: date-time */
+            readonly completedAt: string;
+            readonly notes?: string;
+            readonly exercises: readonly components["schemas"]["WorkoutExerciseRequest"][];
+        };
+        readonly WorkoutSetRequest: {
+            readonly weightKg: number;
+            /** Format: int32 */
+            readonly repetitions: number;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            readonly notes?: string;
+        };
+        readonly WorkoutResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly status?: string;
+            /** Format: date-time */
+            readonly startedAt?: string;
+            /** Format: date-time */
+            readonly completedAt?: string;
+            /** Format: int64 */
+            readonly durationSeconds?: number;
+            readonly notes?: string;
+            /** Format: int32 */
+            readonly exerciseCount?: number;
+            /** Format: int32 */
+            readonly setCount?: number;
+            /** Format: int32 */
+            readonly completedSetCount?: number;
+            /** Format: date-time */
+            readonly createdAt?: string;
         };
         readonly UpdateProfileRequest: {
             readonly displayName: string;
@@ -348,6 +410,45 @@ export interface operations {
                     readonly "application/json": components["schemas"]["OnboardingResponse"];
                 };
             };
+        };
+    };
+    readonly saveCompletedWorkout: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                /** @description Stable key used to make completion retries safe. */
+                readonly "Idempotency-Key": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["WorkoutRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description An identical idempotent request was replayed. */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["WorkoutResponse"];
+                };
+            };
+            /** @description Workout created. */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["WorkoutResponse"];
+                };
+            };
+            readonly 400: components["responses"]["ValidationProblem"];
+            readonly 401: components["responses"]["UnauthenticatedProblem"];
+            readonly 409: components["responses"]["ConflictProblem"];
         };
     };
     readonly complete: {

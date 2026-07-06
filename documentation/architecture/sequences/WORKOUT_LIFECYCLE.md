@@ -12,7 +12,7 @@ sequenceDiagram
 
   User->>Web: Complete workout
   Web->>Web: Validate immediate input
-  Web->>API: POST /api/v1/workouts
+  Web->>API: POST /api/v1/workouts + Idempotency-Key
   API->>API: Authenticate and validate ownership/input
   API->>DB: BEGIN
   API->>DB: Insert workout session
@@ -27,6 +27,29 @@ sequenceDiagram
   API-->>Web: 201 Created + saved workout
   Web-->>User: Completion summary
 ```
+
+## Idempotent retry
+
+```mermaid
+sequenceDiagram
+  participant Web
+  participant API
+  participant DB as PostgreSQL
+
+  Web->>API: POST workout + Idempotency-Key
+  API->>DB: Insert completed session
+  DB-->>API: Existing user/key conflict
+  API->>DB: Read stored fingerprint and workout
+  alt Fingerprint matches
+    API-->>Web: 200 OK + original workout
+  else Fingerprint differs
+    API-->>Web: 409 Conflict
+  end
+```
+
+The key is scoped to the authenticated internal user. A retry with the same
+normalized payload returns the original representation. Reusing the key for a
+different payload is rejected.
 
 ## Failure behavior
 
