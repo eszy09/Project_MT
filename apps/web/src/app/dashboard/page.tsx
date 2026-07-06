@@ -37,12 +37,20 @@ export default async function DashboardPage() {
             Build a focused session with exercises that emphasize{" "}
             {profile.targetAreas.map(targetAreaLabel).join(", ").toLowerCase()}.
           </p>
-          <Link
-            href="/workouts/active"
-            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-300 px-5 py-2 font-bold text-slate-950 hover:bg-emerald-200"
-          >
-            Start workout
-          </Link>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/workouts/active"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-300 px-5 py-2 font-bold text-slate-950 hover:bg-emerald-200"
+            >
+              Start workout
+            </Link>
+            <Link
+              href="/workouts/history"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-emerald-300/30 px-5 py-2 font-semibold text-emerald-200"
+            >
+              View workout history
+            </Link>
+          </div>
         </article>
 
         <article className="rounded-2xl border border-white/10 bg-white/5 p-6">

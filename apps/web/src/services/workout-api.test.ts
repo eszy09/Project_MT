@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   WorkoutApiError,
+  getPreviousPerformance,
+  getWorkoutHistory,
   saveCompletedWorkout,
   type WorkoutCompletionInput,
 } from "./workout-api";
@@ -139,5 +141,44 @@ describe("workout API completion", () => {
     expect(loggedData).not.toContain("secret-access-token");
     expect(loggedData).not.toContain(idempotencyKey);
     expect(loggedData).not.toContain("back-squat");
+  });
+
+  it("loads encoded history filters with authenticated correlation", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ items: [], nextCursor: null }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getWorkoutHistory({
+      exerciseCode: "back-squat",
+      cursor: "cursor/value",
+      limit: 20,
+    });
+
+    const [url, requestInit] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("exerciseCode=back-squat");
+    expect(url).toContain("cursor=cursor%2Fvalue");
+    const headers = new Headers(requestInit.headers);
+    expect(headers.get("Authorization")).toBe("Bearer secret-access-token");
+    expect(headers.get("X-Request-ID")).toBe(requestId);
+  });
+
+  it("treats missing previous performance as an empty state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify({ detail: "The resource was not found." }),
+            { status: 404 },
+          ),
+        ),
+    );
+
+    await expect(getPreviousPerformance("back-squat")).resolves.toBeNull();
   });
 });

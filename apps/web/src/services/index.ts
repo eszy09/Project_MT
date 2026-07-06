@@ -7,7 +7,13 @@ export {
   saveProfileStage,
 } from "./onboarding-api";
 export { logApiFailure } from "./telemetry";
-export { WorkoutApiError, saveCompletedWorkout } from "./workout-api";
+export {
+  WorkoutApiError,
+  getPreviousPerformance,
+  getWorkoutDetail,
+  getWorkoutHistory,
+  saveCompletedWorkout,
+} from "./workout-api";
 
 export type {
   ExperienceLevel,
@@ -17,5 +23,9 @@ export type {
 } from "./onboarding-api";
 export type {
   SavedWorkoutResponse,
+  PreviousPerformance,
+  WorkoutDetail,
   WorkoutCompletionInput,
+  WorkoutHistoryItem,
+  WorkoutHistoryPage,
 } from "./workout-api";

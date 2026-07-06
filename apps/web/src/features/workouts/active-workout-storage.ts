@@ -231,6 +231,9 @@ function isWorkoutSetDraft(value: unknown): value is WorkoutSetDraft {
 function isPreviousPerformance(value: unknown) {
   return (
     isRecord(value) &&
+    typeof value.position === "number" &&
+    Number.isInteger(value.position) &&
+    value.position > 0 &&
     isBoundedString(value.weightKg, 30) &&
     isBoundedString(value.repetitions, 30)
   );

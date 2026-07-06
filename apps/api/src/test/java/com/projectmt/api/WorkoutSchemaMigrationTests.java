@@ -176,6 +176,7 @@ class WorkoutSchemaMigrationTests {
         AND indexname IN (
           'ix_workout_sessions_user_started_at',
           'ix_workout_sessions_user_completed_at',
+          'ix_workout_sessions_user_history_cursor',
           'ix_workout_exercises_user_code_session'
         )
       ORDER BY indexname
@@ -183,12 +184,15 @@ class WorkoutSchemaMigrationTests {
       String.class
     );
 
-    assertEquals(3, indexNames.size());
+    assertEquals(4, indexNames.size());
     assertTrue(
       indexNames.contains("ix_workout_sessions_user_started_at")
     );
     assertTrue(
       indexNames.contains("ix_workout_sessions_user_completed_at")
+    );
+    assertTrue(
+      indexNames.contains("ix_workout_sessions_user_history_cursor")
     );
     assertTrue(
       indexNames.contains("ix_workout_exercises_user_code_session")

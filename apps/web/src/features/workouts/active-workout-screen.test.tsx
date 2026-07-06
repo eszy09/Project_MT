@@ -19,10 +19,12 @@ import { exerciseCatalog } from "./exercise-catalog";
 
 const mocks = vi.hoisted(() => ({
   completeWorkoutAction: vi.fn(),
+  loadPreviousPerformanceAction: vi.fn(),
 }));
 
 vi.mock("./actions", () => ({
   completeWorkoutAction: mocks.completeWorkoutAction,
+  loadPreviousPerformanceAction: mocks.loadPreviousPerformanceAction,
 }));
 
 const startedAt = "2026-07-06T10:00:00Z";
@@ -96,6 +98,11 @@ function storeCompletedBackSquatDraft() {
 
 beforeEach(() => {
   mocks.completeWorkoutAction.mockReset();
+  mocks.loadPreviousPerformanceAction.mockReset();
+  mocks.loadPreviousPerformanceAction.mockResolvedValue({
+    success: true,
+    sets: [],
+  });
   window.localStorage.clear();
 });
 
@@ -192,6 +199,28 @@ describe("ActiveWorkoutScreen", () => {
     expect(
       screen.getByRole("button", { name: /remove back squat set 1/i }),
     ).toBeDisabled();
+  });
+
+  it("loads and copies previous values into today's draft", async () => {
+    mocks.loadPreviousPerformanceAction.mockResolvedValue({
+      success: true,
+      sets: [{ position: 1, weightKg: "80", repetitions: "8" }],
+    });
+    renderScreen();
+    addBackSquat();
+
+    fireEvent.click(await screen.findByRole("button", { name: /80 × 8/i }));
+
+    expect(
+      screen.getByRole("spinbutton", {
+        name: /back squat set 1 weight in kilograms/i,
+      }),
+    ).toHaveValue(80);
+    expect(
+      screen.getByRole("spinbutton", {
+        name: /back squat set 1 repetitions/i,
+      }),
+    ).toHaveValue(8);
   });
 
   it("shows accessible validation and prevents invalid completion", () => {

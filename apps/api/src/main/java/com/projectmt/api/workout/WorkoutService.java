@@ -3,6 +3,7 @@ package com.projectmt.api.workout;
 import com.projectmt.api.auth.CurrentUserService;
 import com.projectmt.api.shared.api.ApiConflictException;
 import com.projectmt.api.shared.api.ApiFieldError;
+import com.projectmt.api.shared.api.ApiResourceNotFoundException;
 import com.projectmt.api.shared.api.ApiValidationException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -12,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
@@ -109,6 +111,161 @@ public class WorkoutService {
       ));
 
     return new WorkoutSaveResult(savedWorkout, false);
+  }
+
+  @Transactional(readOnly = true)
+  public WorkoutHistoryPage history(
+    int limit,
+    String cursor,
+    String exerciseCode,
+    Instant from,
+    Instant to
+  ) {
+    List<ApiFieldError> errors = new ArrayList<>();
+    String normalizedExerciseCode = normalizeExerciseCode(
+      exerciseCode,
+      errors
+    );
+    WorkoutHistoryCursor decodedCursor = decodeCursor(cursor, errors);
+
+    if (from != null && to != null && from.isAfter(to)) {
+      errors.add(
+        fieldError(
+          "from",
+          "RANGE",
+          "The start of the date range must not be after the end."
+        )
+      );
+    }
+    if (!errors.isEmpty()) {
+      throw new ApiValidationException(
+        "Workout history filters are invalid.",
+        errors
+      );
+    }
+
+    UUID userId = currentUsers.requireCurrentUser().id();
+    List<WorkoutHistoryItem> fetched = workouts.findHistory(
+      userId,
+      new WorkoutHistoryFilter(
+        limit,
+        decodedCursor,
+        normalizedExerciseCode,
+        from,
+        to
+      )
+    );
+    boolean hasMore = fetched.size() > limit;
+    List<WorkoutHistoryItem> items = hasMore
+      ? List.copyOf(fetched.subList(0, limit))
+      : List.copyOf(fetched);
+    String nextCursor = hasMore
+      ? encodeCursor(items.getLast())
+      : null;
+
+    return new WorkoutHistoryPage(items, nextCursor);
+  }
+
+  @Transactional(readOnly = true)
+  public WorkoutDetail detail(UUID workoutId) {
+    UUID userId = currentUsers.requireCurrentUser().id();
+    return workouts
+      .findDetail(userId, workoutId)
+      .orElseThrow(ApiResourceNotFoundException::new);
+  }
+
+  @Transactional(readOnly = true)
+  public PreviousExercisePerformance previousPerformance(
+    String exerciseCode
+  ) {
+    List<ApiFieldError> errors = new ArrayList<>();
+    String normalized = normalizeExerciseCode(exerciseCode, errors);
+    if (normalized == null) {
+      errors.add(
+        fieldError(
+          "exerciseCode",
+          "REQUIRED",
+          "Exercise code is required."
+        )
+      );
+    }
+
+    if (!errors.isEmpty()) {
+      throw new ApiValidationException(
+        "The exercise identifier is invalid.",
+        errors
+      );
+    }
+
+    UUID userId = currentUsers.requireCurrentUser().id();
+    return workouts
+      .findPreviousPerformance(userId, normalized)
+      .orElseThrow(ApiResourceNotFoundException::new);
+  }
+
+  private String normalizeExerciseCode(
+    String exerciseCode,
+    List<ApiFieldError> errors
+  ) {
+    if (exerciseCode == null || exerciseCode.isBlank()) {
+      return null;
+    }
+
+    String normalized = exerciseCode.strip();
+    if (
+      normalized.length() > 100
+      || !normalized.matches("[a-z0-9][a-z0-9._-]*")
+    ) {
+      errors.add(
+        fieldError(
+          "exerciseCode",
+          "FORMAT",
+          "Exercise code must be a lowercase canonical identifier."
+        )
+      );
+    }
+    return normalized;
+  }
+
+  private WorkoutHistoryCursor decodeCursor(
+    String cursor,
+    List<ApiFieldError> errors
+  ) {
+    if (cursor == null || cursor.isBlank()) {
+      return null;
+    }
+
+    try {
+      String decoded = new String(
+        Base64.getUrlDecoder().decode(cursor),
+        StandardCharsets.UTF_8
+      );
+      String[] components = decoded.split("\\|", -1);
+      if (components.length != 2) {
+        throw new IllegalArgumentException("Wrong cursor component count.");
+      }
+      return new WorkoutHistoryCursor(
+        Instant.parse(components[0]),
+        UUID.fromString(components[1])
+      );
+    } catch (IllegalArgumentException exception) {
+      errors.add(
+        fieldError(
+          "cursor",
+          "FORMAT",
+          "Cursor is invalid or no longer supported."
+        )
+      );
+      return null;
+    }
+  }
+
+  private String encodeCursor(WorkoutHistoryItem item) {
+    String value = item.completedAt() + "|" + item.id();
+    return Base64
+      .getUrlEncoder()
+      .withoutPadding()
+      .encodeToString(value.getBytes(StandardCharsets.UTF_8));
   }
 
   private WorkoutCompletionCommand normalize(
