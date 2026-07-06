@@ -1,11 +1,18 @@
 import type { ExerciseCatalogItem } from "./exercise-catalog";
 
+export type PreviousSetPerformance = {
+  weightKg: string;
+  repetitions: string;
+};
+
 export type WorkoutSetDraft = {
   id: string;
+  previous: PreviousSetPerformance | null;
   weightKg: string;
   repetitions: string;
   completedAt: string | null;
   notes: string;
+  showValidation: boolean;
 };
 
 export type WorkoutExerciseDraft = {
@@ -25,11 +32,13 @@ export type CompletedWorkoutSummary = {
 
 export type ActiveWorkoutState = {
   startedAt: string;
+  completionKey: string;
   notes: string;
   exercises: WorkoutExerciseDraft[];
   status: "editing" | "saving" | "completed";
   dirty: boolean;
   error: string | null;
+  requestId: string | null;
   completedWorkout: CompletedWorkoutSummary | null;
 };
 
@@ -38,6 +47,7 @@ export type ActiveWorkoutAction =
       type: "exercise-added";
       exercise: ExerciseCatalogItem;
       id: string;
+      setId: string;
     }
   | { type: "exercise-removed"; id: string }
   | {
@@ -45,27 +55,72 @@ export type ActiveWorkoutAction =
       id: string;
       direction: "up" | "down";
     }
+  | {
+      type: "set-added";
+      exerciseId: string;
+      setId: string;
+    }
+  | {
+      type: "set-removed";
+      exerciseId: string;
+      setId: string;
+    }
+  | {
+      type: "set-value-changed";
+      exerciseId: string;
+      setId: string;
+      field: "weightKg" | "repetitions";
+      value: string;
+    }
+  | {
+      type: "set-notes-changed";
+      exerciseId: string;
+      setId: string;
+      notes: string;
+    }
+  | {
+      type: "set-completion-toggled";
+      exerciseId: string;
+      setId: string;
+      completedAt: string;
+    }
   | { type: "notes-changed"; notes: string }
   | { type: "completion-requested" }
   | { type: "save-started" }
-  | { type: "save-failed"; message: string }
+  | {
+      type: "save-failed";
+      message: string;
+      requestId: string | null;
+    }
   | {
       type: "save-completed";
       workout: CompletedWorkoutSummary;
     }
   | { type: "error-dismissed" }
-  | { type: "discarded"; startedAt: string };
+  | {
+      type: "discarded";
+      startedAt: string;
+      completionKey: string;
+    };
+
+export type SetValidation = {
+  weightKg: string | null;
+  repetitions: string | null;
+};
 
 export function createActiveWorkoutState(
   startedAt: string,
+  completionKey: string,
 ): ActiveWorkoutState {
   return {
     startedAt,
+    completionKey,
     notes: "",
     exercises: [],
     status: "editing",
     dirty: false,
     error: null,
+    requestId: null,
     completedWorkout: null,
   };
 }
@@ -84,6 +139,7 @@ export function activeWorkoutReducer(
         return {
           ...state,
           error: `${action.exercise.name} is already in this workout.`,
+          requestId: null,
         };
       }
 
@@ -96,11 +152,12 @@ export function activeWorkoutReducer(
             exerciseCode: action.exercise.code,
             displayName: action.exercise.name,
             notes: "",
-            sets: [],
+            sets: [blankSet(action.setId)],
           },
         ],
         dirty: true,
         error: null,
+        requestId: null,
       };
     }
 
@@ -112,6 +169,7 @@ export function activeWorkoutReducer(
         ),
         dirty: true,
         error: null,
+        requestId: null,
       };
 
     case "exercise-moved": {
@@ -140,8 +198,80 @@ export function activeWorkoutReducer(
         exercises,
         dirty: true,
         error: null,
+        requestId: null,
       };
     }
+
+    case "set-added":
+      return updateExercise(state, action.exerciseId, (exercise) => {
+        const previousSet = exercise.sets.at(-1);
+
+        return {
+          ...exercise,
+          sets: [
+            ...exercise.sets,
+            {
+              ...blankSet(action.setId),
+              weightKg: previousSet?.weightKg ?? "",
+              repetitions: previousSet?.repetitions ?? "",
+            },
+          ],
+        };
+      });
+
+    case "set-removed":
+      return updateExercise(state, action.exerciseId, (exercise) => {
+        if (exercise.sets.length === 1) {
+          return exercise;
+        }
+
+        return {
+          ...exercise,
+          sets: exercise.sets.filter((set) => set.id !== action.setId),
+        };
+      });
+
+    case "set-value-changed":
+      return updateSet(state, action.exerciseId, action.setId, (set) => {
+        const updated = {
+          ...set,
+          [action.field]: action.value,
+        };
+
+        return {
+          ...updated,
+          completedAt: isSetValid(updated) ? set.completedAt : null,
+        };
+      });
+
+    case "set-notes-changed":
+      return updateSet(state, action.exerciseId, action.setId, (set) => ({
+        ...set,
+        notes: action.notes,
+      }));
+
+    case "set-completion-toggled":
+      return updateSet(state, action.exerciseId, action.setId, (set) => {
+        if (set.completedAt !== null) {
+          return {
+            ...set,
+            completedAt: null,
+          };
+        }
+
+        if (!isSetValid(set)) {
+          return {
+            ...set,
+            showValidation: true,
+          };
+        }
+
+        return {
+          ...set,
+          completedAt: action.completedAt,
+          showValidation: true,
+        };
+      });
 
     case "notes-changed":
       return {
@@ -151,31 +281,24 @@ export function activeWorkoutReducer(
       };
 
     case "completion-requested": {
-      if (state.exercises.length === 0) {
-        return {
-          ...state,
-          error: "Add at least one exercise before completing your workout.",
-        };
-      }
-
-      const completedSetCount = state.exercises.reduce(
-        (total, exercise) =>
-          total +
-          exercise.sets.filter((set) => set.completedAt !== null).length,
-        0,
-      );
-
-      if (completedSetCount === 0) {
-        return {
-          ...state,
-          error: "Complete at least one set before finishing your workout.",
-        };
-      }
+      const exercises = state.exercises.map((exercise) => ({
+        ...exercise,
+        sets: exercise.sets.map((set) => ({
+          ...set,
+          showValidation: true,
+        })),
+      }));
+      const error = workoutCompletionError({
+        ...state,
+        exercises,
+      });
 
       return {
         ...state,
-        status: "saving",
-        error: null,
+        exercises,
+        status: error ? "editing" : "saving",
+        error,
+        requestId: null,
       };
     }
 
@@ -184,6 +307,7 @@ export function activeWorkoutReducer(
         ...state,
         status: "saving",
         error: null,
+        requestId: null,
       };
 
     case "save-failed":
@@ -191,6 +315,7 @@ export function activeWorkoutReducer(
         ...state,
         status: "editing",
         error: action.message,
+        requestId: action.requestId,
       };
 
     case "save-completed":
@@ -199,6 +324,7 @@ export function activeWorkoutReducer(
         status: "completed",
         dirty: false,
         error: null,
+        requestId: null,
         completedWorkout: action.workout,
       };
 
@@ -206,9 +332,131 @@ export function activeWorkoutReducer(
       return {
         ...state,
         error: null,
+        requestId: null,
       };
 
     case "discarded":
-      return createActiveWorkoutState(action.startedAt);
+      return createActiveWorkoutState(action.startedAt, action.completionKey);
   }
+}
+
+export function validateSet(set: WorkoutSetDraft): SetValidation {
+  return {
+    weightKg: validateWeight(set.weightKg),
+    repetitions: validateRepetitions(set.repetitions),
+  };
+}
+
+export function isSetValid(set: WorkoutSetDraft) {
+  const validation = validateSet(set);
+  return validation.weightKg === null && validation.repetitions === null;
+}
+
+export function workoutCompletionError(state: ActiveWorkoutState) {
+  if (state.exercises.length === 0) {
+    return "Add at least one exercise before completing your workout.";
+  }
+
+  const allSets = state.exercises.flatMap((exercise) => exercise.sets);
+
+  if (allSets.some((set) => !isSetValid(set))) {
+    return "Correct the highlighted set values before completing your workout.";
+  }
+
+  if (allSets.every((set) => set.completedAt === null)) {
+    return "Complete at least one set before finishing your workout.";
+  }
+
+  return null;
+}
+
+export function calculateWorkoutVolume(state: ActiveWorkoutState) {
+  return state.exercises
+    .flatMap((exercise) => exercise.sets)
+    .reduce(
+      (volume, set) => {
+        if (!isSetValid(set)) {
+          return volume;
+        }
+
+        const setVolume = Number(set.weightKg) * Number(set.repetitions);
+
+        return {
+          planned: volume.planned + setVolume,
+          completed:
+            volume.completed + (set.completedAt === null ? 0 : setVolume),
+        };
+      },
+      { planned: 0, completed: 0 },
+    );
+}
+
+function blankSet(id: string): WorkoutSetDraft {
+  return {
+    id,
+    previous: null,
+    weightKg: "",
+    repetitions: "",
+    completedAt: null,
+    notes: "",
+    showValidation: false,
+  };
+}
+
+function updateExercise(
+  state: ActiveWorkoutState,
+  exerciseId: string,
+  update: (exercise: WorkoutExerciseDraft) => WorkoutExerciseDraft,
+) {
+  return {
+    ...state,
+    exercises: state.exercises.map((exercise) =>
+      exercise.id === exerciseId ? update(exercise) : exercise,
+    ),
+    dirty: true,
+    error: null,
+    requestId: null,
+  };
+}
+
+function updateSet(
+  state: ActiveWorkoutState,
+  exerciseId: string,
+  setId: string,
+  update: (set: WorkoutSetDraft) => WorkoutSetDraft,
+) {
+  return updateExercise(state, exerciseId, (exercise) => ({
+    ...exercise,
+    sets: exercise.sets.map((set) => (set.id === setId ? update(set) : set)),
+  }));
+}
+
+function validateWeight(value: string) {
+  if (!value.trim()) {
+    return "Enter weight.";
+  }
+
+  if (!/^(?:\d+(?:\.\d{0,3})?|\.\d{1,3})$/.test(value)) {
+    return "Use up to three decimal places.";
+  }
+
+  const weight = Number(value);
+  return weight >= 0 && weight <= 2000
+    ? null
+    : "Weight must be between 0 and 2000 kg.";
+}
+
+function validateRepetitions(value: string) {
+  if (!value.trim()) {
+    return "Enter repetitions.";
+  }
+
+  if (!/^\d+$/.test(value)) {
+    return "Repetitions must be a whole number.";
+  }
+
+  const repetitions = Number(value);
+  return repetitions >= 1 && repetitions <= 1000
+    ? null
+    : "Repetitions must be between 1 and 1000.";
 }

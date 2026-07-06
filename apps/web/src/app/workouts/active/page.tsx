@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/features/auth";
 import { ActiveWorkoutScreen } from "@/features/workouts";
@@ -17,5 +18,10 @@ export default async function ActiveWorkoutPage() {
     redirect("/onboarding");
   }
 
-  return <ActiveWorkoutScreen startedAt={new Date().toISOString()} />;
+  return (
+    <ActiveWorkoutScreen
+      startedAt={new Date().toISOString()}
+      completionKey={randomUUID()}
+    />
+  );
 }

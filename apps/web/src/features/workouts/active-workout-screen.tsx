@@ -4,17 +4,29 @@ import Link from "next/link";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   activeWorkoutReducer,
+  calculateWorkoutVolume,
   createActiveWorkoutState,
+  validateSet,
+  workoutCompletionError,
   type WorkoutExerciseDraft,
+  type WorkoutSetDraft,
 } from "./active-workout-state";
+import { completeWorkoutAction } from "./actions";
 import { exerciseCatalog, type ExerciseCatalogItem } from "./exercise-catalog";
 import { useUnsavedWorkoutWarning } from "./use-unsaved-workout-warning";
 
-export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
+export function ActiveWorkoutScreen({
+  startedAt,
+  completionKey,
+}: {
+  startedAt: string;
+  completionKey: string;
+}) {
   const [state, dispatch] = useReducer(
     activeWorkoutReducer,
-    startedAt,
-    createActiveWorkoutState,
+    { startedAt, completionKey },
+    ({ startedAt: initialStartedAt, completionKey: initialCompletionKey }) =>
+      createActiveWorkoutState(initialStartedAt, initialCompletionKey),
   );
   const [pickerOpen, setPickerOpen] = useState(false);
   const addExerciseButtonRef = useRef<HTMLButtonElement>(null);
@@ -28,6 +40,7 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
       total + exercise.sets.filter((set) => set.completedAt !== null).length,
     0,
   );
+  const volume = calculateWorkoutVolume(state);
 
   useUnsavedWorkoutWarning(state.dirty && state.status !== "completed");
 
@@ -39,6 +52,7 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
           dispatch({
             type: "discarded",
             startedAt: new Date().toISOString(),
+            completionKey: crypto.randomUUID(),
           })
         }
       />
@@ -55,6 +69,7 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
       type: "exercise-added",
       exercise,
       id: crypto.randomUUID(),
+      setId: crypto.randomUUID(),
     });
     closePicker();
   };
@@ -72,6 +87,50 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
     dispatch({
       type: "discarded",
       startedAt: new Date().toISOString(),
+      completionKey: crypto.randomUUID(),
+    });
+  };
+
+  const completeWorkout = async () => {
+    const validationError = workoutCompletionError(state);
+    dispatch({ type: "completion-requested" });
+
+    if (validationError) {
+      return;
+    }
+
+    const result = await completeWorkoutAction({
+      completionKey: state.completionKey,
+      workout: {
+        startedAt: state.startedAt,
+        completedAt: new Date().toISOString(),
+        notes: optionalText(state.notes),
+        exercises: state.exercises.map((exercise) => ({
+          exerciseCode: exercise.exerciseCode,
+          displayName: exercise.displayName,
+          notes: optionalText(exercise.notes),
+          sets: exercise.sets.map((set) => ({
+            weightKg: Number(set.weightKg),
+            repetitions: Number(set.repetitions),
+            completedAt: set.completedAt ?? undefined,
+            notes: optionalText(set.notes),
+          })),
+        })),
+      },
+    });
+
+    if (!result.success) {
+      dispatch({
+        type: "save-failed",
+        message: result.error,
+        requestId: result.requestId,
+      });
+      return;
+    }
+
+    dispatch({
+      type: "save-completed",
+      workout: result.workout,
     });
   };
 
@@ -118,10 +177,17 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Metric label="Exercises" value={state.exercises.length} />
             <Metric label="Sets" value={totalSetCount} />
-            <Metric label="Completed" value={completedSetCount} />
+            <Metric
+              label="Planned volume"
+              value={formatVolume(volume.planned)}
+            />
+            <Metric
+              label="Completed volume"
+              value={formatVolume(volume.completed)}
+            />
           </div>
 
           <div className="mt-6 flex items-center justify-between gap-4">
@@ -150,6 +216,11 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
               <div>
                 <p className="font-semibold">Workout needs attention</p>
                 <p className="mt-1 text-amber-100/80">{state.error}</p>
+                {state.requestId && (
+                  <p className="mt-2 font-mono text-xs text-amber-200">
+                    Reference: {state.requestId}
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -195,6 +266,45 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
                       id: exercise.id,
                     });
                   }}
+                  onAddSet={() =>
+                    dispatch({
+                      type: "set-added",
+                      exerciseId: exercise.id,
+                      setId: crypto.randomUUID(),
+                    })
+                  }
+                  onRemoveSet={(setId) =>
+                    dispatch({
+                      type: "set-removed",
+                      exerciseId: exercise.id,
+                      setId,
+                    })
+                  }
+                  onSetValueChange={(setId, field, value) =>
+                    dispatch({
+                      type: "set-value-changed",
+                      exerciseId: exercise.id,
+                      setId,
+                      field,
+                      value,
+                    })
+                  }
+                  onSetNotesChange={(setId, notes) =>
+                    dispatch({
+                      type: "set-notes-changed",
+                      exerciseId: exercise.id,
+                      setId,
+                      notes,
+                    })
+                  }
+                  onToggleSet={(setId) =>
+                    dispatch({
+                      type: "set-completion-toggled",
+                      exerciseId: exercise.id,
+                      setId,
+                      completedAt: new Date().toISOString(),
+                    })
+                  }
                 />
               ))}
             </ol>
@@ -255,7 +365,7 @@ export function ActiveWorkoutScreen({ startedAt }: { startedAt: string }) {
           <button
             type="button"
             disabled={state.status === "saving"}
-            onClick={() => dispatch({ type: "completion-requested" })}
+            onClick={() => void completeWorkout()}
             className="min-h-12 w-full rounded-xl bg-white px-6 py-3 font-bold text-slate-950 hover:bg-slate-200 disabled:cursor-wait disabled:opacity-60 sm:ml-auto sm:w-auto"
           >
             {state.status === "saving"
@@ -307,6 +417,11 @@ function ExerciseCard({
   last,
   onMove,
   onRemove,
+  onAddSet,
+  onRemoveSet,
+  onSetValueChange,
+  onSetNotesChange,
+  onToggleSet,
 }: {
   exercise: WorkoutExerciseDraft;
   position: number;
@@ -314,6 +429,15 @@ function ExerciseCard({
   last: boolean;
   onMove: (direction: "up" | "down") => void;
   onRemove: () => void;
+  onAddSet: () => void;
+  onRemoveSet: (setId: string) => void;
+  onSetValueChange: (
+    setId: string,
+    field: "weightKg" | "repetitions",
+    value: string,
+  ) => void;
+  onSetNotesChange: (setId: string, notes: string) => void;
+  onToggleSet: (setId: string) => void;
 }) {
   return (
     <li className="rounded-2xl border border-white/10 bg-slate-900/70">
@@ -361,15 +485,228 @@ function ExerciseCard({
           </button>
         </div>
       </div>
-      <div className="px-5 py-6 text-center">
-        <p className="text-sm font-semibold text-slate-300">
-          No sets logged yet
-        </p>
-        <p className="mt-1 text-xs text-slate-500">
-          Add and complete sets before finishing this workout.
-        </p>
-      </div>
+      <SetTable
+        exercise={exercise}
+        onAdd={onAddSet}
+        onRemove={onRemoveSet}
+        onValueChange={onSetValueChange}
+        onNotesChange={onSetNotesChange}
+        onToggle={onToggleSet}
+      />
     </li>
+  );
+}
+
+function SetTable({
+  exercise,
+  onAdd,
+  onRemove,
+  onValueChange,
+  onNotesChange,
+  onToggle,
+}: {
+  exercise: WorkoutExerciseDraft;
+  onAdd: () => void;
+  onRemove: (setId: string) => void;
+  onValueChange: (
+    setId: string,
+    field: "weightKg" | "repetitions",
+    value: string,
+  ) => void;
+  onNotesChange: (setId: string, notes: string) => void;
+  onToggle: (setId: string) => void;
+}) {
+  return (
+    <div className="p-3 sm:p-5">
+      <div
+        aria-hidden="true"
+        className="mb-2 hidden grid-cols-[2.5rem_6rem_minmax(5rem,1fr)_minmax(4.5rem,0.8fr)_3rem_3rem] gap-2 px-1 text-xs font-semibold tracking-wide text-slate-500 uppercase sm:grid"
+      >
+        <span>Set</span>
+        <span>Previous</span>
+        <span>kg</span>
+        <span>Reps</span>
+        <span className="text-center">Done</span>
+        <span />
+      </div>
+
+      <div className="space-y-2">
+        {exercise.sets.map((set, index) => (
+          <SetRow
+            key={set.id}
+            exerciseName={exercise.displayName}
+            set={set}
+            position={index + 1}
+            onlySet={exercise.sets.length === 1}
+            onRemove={() => onRemove(set.id)}
+            onValueChange={(field, value) =>
+              onValueChange(set.id, field, value)
+            }
+            onNotesChange={(notes) => onNotesChange(set.id, notes)}
+            onToggle={() => onToggle(set.id)}
+          />
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onAdd}
+        className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-emerald-300 hover:bg-emerald-300/10"
+      >
+        <PlusIcon />
+        Add set
+      </button>
+    </div>
+  );
+}
+
+function SetRow({
+  exerciseName,
+  set,
+  position,
+  onlySet,
+  onRemove,
+  onValueChange,
+  onNotesChange,
+  onToggle,
+}: {
+  exerciseName: string;
+  set: WorkoutSetDraft;
+  position: number;
+  onlySet: boolean;
+  onRemove: () => void;
+  onValueChange: (field: "weightKg" | "repetitions", value: string) => void;
+  onNotesChange: (notes: string) => void;
+  onToggle: () => void;
+}) {
+  const validation = validateSet(set);
+  const weightError =
+    set.showValidation || set.weightKg !== "" ? validation.weightKg : null;
+  const repetitionsError =
+    set.showValidation || set.repetitions !== ""
+      ? validation.repetitions
+      : null;
+  const weightErrorId = `${set.id}-weight-error`;
+  const repetitionsErrorId = `${set.id}-repetitions-error`;
+  const complete = set.completedAt !== null;
+
+  return (
+    <div
+      className={`rounded-xl border p-2 ${
+        complete
+          ? "border-emerald-300/35 bg-emerald-300/[0.06]"
+          : "border-white/5 bg-slate-950/60"
+      }`}
+    >
+      <div className="grid grid-cols-[2.5rem_minmax(5rem,1fr)_minmax(4.5rem,0.8fr)_3rem_3rem] items-start gap-2 sm:grid-cols-[2.5rem_6rem_minmax(5rem,1fr)_minmax(4.5rem,0.8fr)_3rem_3rem]">
+        <span className="flex min-h-11 items-center justify-center text-sm font-bold text-slate-400">
+          {position}
+        </span>
+
+        <div className="hidden min-h-11 items-center text-sm text-slate-500 sm:flex">
+          {set.previous
+            ? `${set.previous.weightKg} × ${set.previous.repetitions}`
+            : "—"}
+        </div>
+
+        <div>
+          <label htmlFor={`${set.id}-weight`} className="sr-only">
+            {exerciseName} set {position} weight in kilograms
+          </label>
+          <input
+            id={`${set.id}-weight`}
+            type="number"
+            inputMode="decimal"
+            min="0"
+            max="2000"
+            step="0.001"
+            value={set.weightKg}
+            onChange={(event) => onValueChange("weightKg", event.target.value)}
+            aria-invalid={weightError ? "true" : undefined}
+            aria-describedby={weightError ? weightErrorId : undefined}
+            placeholder="kg"
+            className="min-h-11 w-full rounded-lg border border-white/10 bg-slate-900 px-3 text-sm placeholder:text-slate-600"
+          />
+          {weightError && (
+            <p id={weightErrorId} className="mt-1 text-xs text-red-300">
+              {weightError}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor={`${set.id}-repetitions`} className="sr-only">
+            {exerciseName} set {position} repetitions
+          </label>
+          <input
+            id={`${set.id}-repetitions`}
+            type="number"
+            inputMode="numeric"
+            min="1"
+            max="1000"
+            step="1"
+            value={set.repetitions}
+            onChange={(event) =>
+              onValueChange("repetitions", event.target.value)
+            }
+            aria-invalid={repetitionsError ? "true" : undefined}
+            aria-describedby={repetitionsError ? repetitionsErrorId : undefined}
+            placeholder="reps"
+            className="min-h-11 w-full rounded-lg border border-white/10 bg-slate-900 px-3 text-sm placeholder:text-slate-600"
+          />
+          {repetitionsError && (
+            <p id={repetitionsErrorId} className="mt-1 text-xs text-red-300">
+              {repetitionsError}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          aria-pressed={complete}
+          aria-label={`${complete ? "Mark incomplete" : "Complete"} ${exerciseName} set ${position}`}
+          onClick={onToggle}
+          className={`flex size-11 items-center justify-center rounded-lg border ${
+            complete
+              ? "border-emerald-300 bg-emerald-300 text-slate-950"
+              : "border-white/15 text-slate-500 hover:border-emerald-300/50 hover:text-emerald-300"
+          }`}
+        >
+          {complete && <SmallCheckIcon />}
+        </button>
+
+        <button
+          type="button"
+          disabled={onlySet}
+          onClick={onRemove}
+          aria-label={`Remove ${exerciseName} set ${position}`}
+          title={
+            onlySet ? "Each exercise requires at least one set" : undefined
+          }
+          className="flex size-11 items-center justify-center rounded-lg text-slate-500 hover:bg-red-300/10 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-25"
+        >
+          <TrashIcon />
+        </button>
+      </div>
+
+      <details className="mt-1">
+        <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-lg px-2 text-xs font-semibold text-slate-500 hover:text-slate-300">
+          {set.notes ? "Edit set note" : "Add set note"}
+        </summary>
+        <label htmlFor={`${set.id}-notes`} className="sr-only">
+          {exerciseName} set {position} notes
+        </label>
+        <textarea
+          id={`${set.id}-notes`}
+          value={set.notes}
+          onChange={(event) => onNotesChange(event.target.value)}
+          maxLength={500}
+          rows={2}
+          placeholder="Optional private note"
+          className="mt-1 w-full resize-y rounded-lg border border-white/10 bg-slate-900 p-3 text-sm placeholder:text-slate-600"
+        />
+      </details>
+    </div>
   );
 }
 
@@ -635,6 +972,17 @@ function formatDuration(totalSeconds: number) {
   return [hours, minutes, seconds]
     .map((value) => value.toString().padStart(2, "0"))
     .join(":");
+}
+
+function formatVolume(volume: number) {
+  return `${new Intl.NumberFormat("en", {
+    maximumFractionDigits: 1,
+  }).format(volume)} kg·reps`;
+}
+
+function optionalText(value: string) {
+  const normalized = value.trim();
+  return normalized ? normalized : undefined;
 }
 
 function Icon({
