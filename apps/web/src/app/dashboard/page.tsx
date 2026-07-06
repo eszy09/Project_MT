@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/features/auth";
 import { primaryGoalLabel, targetAreaLabel } from "@/features/onboarding";
@@ -31,14 +32,17 @@ export default async function DashboardPage() {
           <p className="text-sm font-semibold text-emerald-200">
             Recommended next step
           </p>
-          <h2 className="mt-2 text-2xl font-bold">
-            Build your first training routine
-          </h2>
+          <h2 className="mt-2 text-2xl font-bold">Log your first workout</h2>
           <p className="mt-3 text-slate-300">
-            Start with a balanced routine that emphasizes{" "}
+            Build a focused session with exercises that emphasize{" "}
             {profile.targetAreas.map(targetAreaLabel).join(", ").toLowerCase()}.
-            Routine building arrives in the next delivery phase.
           </p>
+          <Link
+            href="/workouts/active"
+            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-300 px-5 py-2 font-bold text-slate-950 hover:bg-emerald-200"
+          >
+            Start workout
+          </Link>
         </article>
 
         <article className="rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -62,8 +66,8 @@ export default async function DashboardPage() {
 
       <div className="mt-5 grid gap-5 sm:grid-cols-3">
         {[
-          ["1", "Create a routine"],
-          ["2", "Log your first workout"],
+          ["1", "Log your first workout"],
+          ["2", "Create a reusable routine"],
           ["3", "Record a progress check-in"],
         ].map(([number, label]) => (
           <div
