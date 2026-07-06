@@ -56,6 +56,12 @@ export default async function DashboardPage() {
             >
               Manage routines
             </Link>
+            <Link
+              href="/progress"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/15 px-5 py-2 font-semibold"
+            >
+              View progress
+            </Link>
           </div>
         </article>
 
