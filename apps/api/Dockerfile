@@ -22,6 +22,7 @@ WORKDIR /app
 ENV API_PORT=8080
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 
+RUN apk upgrade --no-cache p11-kit p11-kit-trust
 RUN addgroup -S projectmt && adduser -S projectmt -G projectmt
 
 COPY --from=build --chown=projectmt:projectmt /workspace/apps/api/target/api-0.0.1-SNAPSHOT.jar /app/api.jar
