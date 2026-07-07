@@ -9,6 +9,7 @@ This directory is the documentation source of truth for Project_MT.
 3. [Implementation plan](delivery/IMPLEMENTATION_PLAN.md)
 4. [Decisions requiring guidance](governance/DECISIONS_REQUIRED.md)
 5. [Complete build guide](reference/COMPLETE_BUILD_GUIDE.md)
+6. [Security, privacy, and accessibility release review](release/SECURITY_PRIVACY_ACCESSIBILITY_REVIEW.md)
 
 ## Documentation map
 
@@ -32,6 +33,9 @@ documentation/
 |   `-- DECISIONS_REQUIRED.md
 |-- operations/
 |   `-- GITHUB_WORKFLOW.md
+|-- release/
+|   |-- SECURITY_PRIVACY_ACCESSIBILITY_REVIEW.md
+|   `-- PRODUCTION_RELEASE_APPROVAL.md
 `-- reference/
     `-- COMPLETE_BUILD_GUIDE.md
 ```
@@ -66,4 +70,3 @@ Present options, consequences, and a recommendation before implementing conseque
 ## Maintenance rule
 
 Update documentation in the same pull request as the behavior or architecture change. Supersede architecture decision records; do not rewrite their history.
-
