@@ -21,6 +21,7 @@
 - [Body model asset pipeline](data/BODY_MODEL_ASSET_PIPELINE.md)
 - [Body model accessibility contract](data/BODY_MODEL_ACCESSIBILITY.md)
 - [Private journal data policy](data/JOURNAL_PRIVACY.md)
+- [Private media upload policy](data/MEDIA_UPLOAD_POLICY.md)
 - [Media upload](sequences/MEDIA_UPLOAD.md)
 
 ## Data model
