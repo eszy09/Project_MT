@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { detectBodyModelCapability } from "./body-model-capability";
@@ -44,6 +44,42 @@ describe("body model capability and states", () => {
       }),
     ).toBeVisible();
     expect(screen.getByText(/webgl is unavailable/i)).toBeVisible();
+  });
+
+  it("provides equivalent list controls with canonical region identifiers", () => {
+    Object.defineProperty(window, "WebGLRenderingContext", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(window, "WebGL2RenderingContext", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(navigator, "deviceMemory", {
+      configurable: true,
+      value: 8,
+    });
+    Object.defineProperty(navigator, "hardwareConcurrency", {
+      configurable: true,
+      value: 8,
+    });
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({ matches: false })),
+    );
+
+    render(<BodyModelCard />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(screen.getByText("Canonical ID: back")).toBeVisible();
+    expect(
+      screen.getByText(/upper-back, lat, and posterior torso/i),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: /back view/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   it("honors reduced motion even when WebGL is available", () => {

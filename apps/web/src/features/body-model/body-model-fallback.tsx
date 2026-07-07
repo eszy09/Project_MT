@@ -1,9 +1,11 @@
 export function BodyModelFallback({
   reason,
   failed = false,
+  selectedLabel = "Selected area",
 }: {
   reason: string;
   failed?: boolean;
+  selectedLabel?: string;
 }) {
   return (
     <div className="flex min-h-96 flex-col items-center justify-center rounded-xl bg-slate-950/70 p-6 text-center">
@@ -24,6 +26,7 @@ export function BodyModelFallback({
       <p className="mt-4 font-semibold">
         {failed ? "Interactive model unavailable" : "Static model view"}
       </p>
+      <p className="mt-2 text-sm text-emerald-200">{selectedLabel}</p>
       <p className="mt-2 max-w-md text-sm text-slate-400">{reason}</p>
     </div>
   );

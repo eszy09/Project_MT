@@ -9,8 +9,16 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { detectBodyModelCapability } from "./body-model-capability";
 import { BodyModelFallback } from "./body-model-fallback";
+import { BodyModelRegionControls } from "./body-model-region-controls";
+import {
+  DEFAULT_BODY_MODEL_REGION_ID,
+  type BodyModelRegionId,
+  type BodyModelView,
+  findBodyModelRegion,
+} from "./body-model-regions";
 
 const LazyBodyModelCanvas = dynamic(() => import("./body-model-canvas"), {
   ssr: false,
@@ -23,7 +31,12 @@ export function BodyModelCard() {
     () => typeof window !== "undefined" && !("IntersectionObserver" in window),
   );
   const [capability] = useState(() => detectBodyModelCapability());
+  const [selectedRegionId, setSelectedRegionId] = useState<BodyModelRegionId>(
+    DEFAULT_BODY_MODEL_REGION_ID,
+  );
+  const [view, setView] = useState<BodyModelView>("front");
   const [retryKey, setRetryKey] = useState(0);
+  const selectedRegion = findBodyModelRegion(selectedRegionId);
 
   useEffect(() => {
     if (!("IntersectionObserver" in window)) return;
@@ -53,14 +66,24 @@ export function BodyModelCard() {
         <h2 className="mt-1 text-2xl font-bold">Interactive body model</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
           Rotate and zoom the model to understand its regions. This is a visual
-          aid based on recorded measurements, not a clinical body scan.
+          aid based on recorded measurements, not a clinical body scan. The
+          buttons below provide the same muscle-area selection without needing
+          the canvas.
         </p>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 space-y-5">
+        <BodyModelRegionControls
+          selectedRegionId={selectedRegionId}
+          view={view}
+          onSelectRegion={setSelectedRegionId}
+          onChangeView={setView}
+        />
+
         {capability.mode === "static" ? (
           <BodyModelFallback
             reason={capability.reason ?? "Static view selected."}
+            selectedLabel={selectedRegion.label}
           />
         ) : !visible ? (
           <BodyModelLoading message="3D model will load when it enters view." />
@@ -69,7 +92,12 @@ export function BodyModelCard() {
             key={retryKey}
             onRetry={() => setRetryKey((value) => value + 1)}
           >
-            <LazyBodyModelCanvas />
+            <LazyBodyModelCanvas
+              selectedRegionId={selectedRegionId}
+              view={view}
+              onSelectRegion={setSelectedRegionId}
+              reducedMotion={capability.reason?.includes("reduced motion")}
+            />
           </BodyModelErrorBoundary>
         )}
       </div>
@@ -78,7 +106,7 @@ export function BodyModelCard() {
 }
 
 export function BodyModelLoading({
-  message = "Loading interactive model…",
+  message = "Loading interactive model...",
 }: {
   message?: string;
 }) {
@@ -116,7 +144,7 @@ class BodyModelErrorBoundary extends Component<
       <div>
         <BodyModelFallback
           failed
-          reason="The 3D asset could not be loaded. The static view keeps progress information available."
+          reason="The 3D asset could not be loaded. The static view keeps workout logging and progress information available."
         />
         <button
           type="button"
