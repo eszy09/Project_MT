@@ -12,6 +12,8 @@
     "test:web": "npm --workspace @project-mt/web run test",
     "build:body-model": "node scripts/body-model/build-body-model.mjs",
     "check:body-model": "node scripts/body-model/check-body-model.mjs",
+    "smoke:staging": "node scripts/staging/smoke-test.mjs",
+    "e2e:staging": "node scripts/staging/e2e-check.mjs",
     "generate:api-contract": "npm --workspace @project-mt/api-contract run generate",
     "check:api-contract": "npm --workspace @project-mt/api-contract run check"
   },

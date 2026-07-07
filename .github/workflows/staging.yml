@@ -1,0 +1,166 @@
+name: Staging Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Deploy new images or roll back to an existing image tag.
+        required: true
+        default: deploy
+        type: choice
+        options:
+          - deploy
+          - rollback
+      image_tag:
+        description: Image tag to deploy. Leave empty for the current commit when deploying.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: staging-deployment
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  prepare:
+    name: Prepare staging deployment
+    runs-on: ubuntu-latest
+    outputs:
+      owner: ${{ steps.meta.outputs.owner }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      api_image: ${{ steps.meta.outputs.api_image }}
+      web_image: ${{ steps.meta.outputs.web_image }}
+
+    steps:
+      - name: Resolve deployment metadata
+        id: meta
+        shell: bash
+        run: |
+          owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+
+          if [ -n "${{ inputs.image_tag }}" ]; then
+            image_tag="${{ inputs.image_tag }}"
+          else
+            image_tag="${{ github.sha }}"
+          fi
+
+          echo "owner=$owner" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
+          echo "api_image=${{ env.REGISTRY }}/$owner/project-mt-api:$image_tag" >> "$GITHUB_OUTPUT"
+          echo "web_image=${{ env.REGISTRY }}/$owner/project-mt-web:$image_tag" >> "$GITHUB_OUTPUT"
+
+  build-and-publish:
+    name: Build and publish staging images
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: ${{ inputs.operation == 'deploy' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish API image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ needs.prepare.outputs.api_image }}
+            ${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}/project-mt-api:staging-latest
+
+      - name: Build and publish web image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ${{ needs.prepare.outputs.web_image }}
+            ${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}/project-mt-web:staging-latest
+
+  deploy:
+    name: Deploy staging
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - build-and-publish
+    if: ${{ always() && (inputs.operation == 'rollback' || needs.build-and-publish.result == 'success') }}
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_WEB_URL }}
+
+    env:
+      API_IMAGE: ${{ needs.prepare.outputs.api_image }}
+      WEB_IMAGE: ${{ needs.prepare.outputs.web_image }}
+      IMAGE_TAG: ${{ needs.prepare.outputs.image_tag }}
+      OPERATION: ${{ inputs.operation }}
+      STAGING_API_BASE_URL: ${{ vars.STAGING_API_BASE_URL }}
+      STAGING_WEB_URL: ${{ vars.STAGING_WEB_URL }}
+      STAGING_API_DEPLOY_HOOK_URL: ${{ secrets.STAGING_API_DEPLOY_HOOK_URL }}
+      STAGING_WEB_DEPLOY_HOOK_URL: ${{ secrets.STAGING_WEB_DEPLOY_HOOK_URL }}
+      STAGING_DEPLOY_HOOK_TOKEN: ${{ secrets.STAGING_DEPLOY_HOOK_TOKEN }}
+      DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+      DATABASE_USERNAME: ${{ secrets.STAGING_DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ secrets.STAGING_DATABASE_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Validate isolated staging configuration
+        shell: bash
+        run: |
+          test -n "$STAGING_API_BASE_URL"
+          test -n "$STAGING_WEB_URL"
+          test -n "$STAGING_API_DEPLOY_HOOK_URL"
+          test -n "$STAGING_WEB_DEPLOY_HOOK_URL"
+          test -n "$DATABASE_URL"
+          test -n "$DATABASE_USERNAME"
+          test -n "$DATABASE_PASSWORD"
+
+      - name: Run Flyway migrations safely
+        if: ${{ inputs.operation == 'deploy' }}
+        run: |
+          docker run --rm \
+            -v "$PWD/apps/api/src/main/resources/db/migration:/flyway/sql:ro" \
+            flyway/flyway:11 \
+            -url="$DATABASE_URL" \
+            -user="$DATABASE_USERNAME" \
+            -password="$DATABASE_PASSWORD" \
+            -cleanDisabled=true \
+            -validateMigrationNaming=true \
+            migrate
+
+      - name: Trigger API deployment
+        run: node scripts/staging/trigger-deploy.mjs api
+
+      - name: Trigger web deployment
+        run: node scripts/staging/trigger-deploy.mjs web
+
+      - name: Run staging smoke checks
+        run: node scripts/staging/smoke-test.mjs
+
+      - name: Run staging end-to-end checks
+        run: node scripts/staging/e2e-check.mjs

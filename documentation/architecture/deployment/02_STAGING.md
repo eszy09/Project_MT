@@ -33,3 +33,6 @@ flowchart LR
 - Health checks and telemetry operate.
 - Rollback procedure is documented.
 
+## Pipeline
+
+The executable staging pipeline is documented in [Staging deployment pipeline](STAGING_PIPELINE.md).
