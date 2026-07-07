@@ -1,0 +1,16 @@
+.git
+.github
+.next
+node_modules
+target
+**/target
+**/.next
+**/node_modules
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+npm-debug.log*
+Dockerfile
+*.log

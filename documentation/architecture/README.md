@@ -34,6 +34,7 @@
 - [Early staging](deployment/02_STAGING.md)
 - [Production](deployment/03_PRODUCTION.md)
 - [Scaling](deployment/04_SCALING.md)
+- [Container images](deployment/CONTAINER_IMAGES.md)
 
 ## Architecture decisions
 
