@@ -173,6 +173,38 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/media/{id}/complete": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["complete_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/media/upload-operations": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createUploadOperation"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/journal": {
         readonly parameters: {
             readonly query?: never;
@@ -295,7 +327,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/checkins/{id}": {
+    readonly "/api/v1/media": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["list_3"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/media/{id}": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -303,6 +351,22 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get: operations["get_4"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete: operations["delete_3"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/checkins/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["get_5"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -477,6 +541,40 @@ export interface components {
             readonly completedSetCount?: number;
             /** Format: date-time */
             readonly createdAt?: string;
+        };
+        readonly MediaAssetResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly filename?: string;
+            readonly contentType?: string;
+            /** Format: int64 */
+            readonly sizeBytes?: number;
+            readonly status?: string;
+            readonly retentionPolicy?: string;
+            /** Format: date-time */
+            readonly consentAcceptedAt?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly MediaUploadOperationRequest: {
+            readonly filename: string;
+            readonly contentType: string;
+            /** Format: int64 */
+            readonly sizeBytes?: number;
+            readonly consentAccepted: boolean;
+        };
+        readonly MediaUploadOperationResponse: {
+            readonly asset?: components["schemas"]["MediaAssetResponse"];
+            /** Format: uri */
+            readonly uploadUrl?: string;
+            readonly method?: string;
+            readonly headers?: {
+                readonly [key: string]: string;
+            };
+            /** Format: date-time */
+            readonly expiresAt?: string;
         };
         readonly BodyCheckinRequest: {
             /** Format: date-time */
@@ -1075,6 +1173,52 @@ export interface operations {
             readonly 409: components["responses"]["ConflictProblem"];
         };
     };
+    readonly complete_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["MediaAssetResponse"];
+                };
+            };
+        };
+    };
+    readonly createUploadOperation: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["MediaUploadOperationRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["MediaUploadOperationResponse"];
+                };
+            };
+        };
+    };
     readonly list_1: {
         readonly parameters: {
             readonly query?: never;
@@ -1330,7 +1474,69 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
+    readonly list_3: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": readonly components["schemas"]["MediaAssetResponse"][];
+                };
+            };
+        };
+    };
     readonly get_4: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["MediaAssetResponse"];
+                };
+            };
+        };
+    };
+    readonly delete_3: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description No Content */
+            readonly 204: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    readonly get_5: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
