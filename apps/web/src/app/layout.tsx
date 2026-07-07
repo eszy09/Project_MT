@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import { AuthNavigation } from "@/features/auth";
 import "./globals.css";
 
@@ -27,11 +28,16 @@ export default function RootLayout({
         </a>
 
         <div className="flex min-h-screen flex-col">
-          <header className="border-b border-white/10 bg-slate-950">
+          <header className="sticky top-0 z-40 border-b border-white/10 bg-[#03040b]/85 backdrop-blur-xl">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-              <span className="text-lg font-semibold tracking-tight">
-                Project_MT
-              </span>
+              <Link href="/" className="group flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-2xl border border-lime-300/30 bg-lime-300/10 text-sm font-black text-lime-200 shadow-lg shadow-lime-500/10">
+                  MT
+                </span>
+                <span className="text-lg font-black tracking-[-0.04em]">
+                  Project_MT
+                </span>
+              </Link>
 
               <AuthNavigation />
             </div>
