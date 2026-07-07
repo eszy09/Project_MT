@@ -1,0 +1,20 @@
+{
+  "asset": "/models/project-mt-body-v1.glb",
+  "source": "assets/body-model/source/project-mt-body-v1.fbx",
+  "sourceSha256": "9ed4c2d28c06d99a545543e729ee10f30d5da44b5168c2a1315c9eae669c8f9d",
+  "outputSha256": "4de7c8011b04a421cac9820413cacd041bf9e876ea0e1273789b3417413d0718",
+  "outputBytes": 11016,
+  "byteBudget": 250000,
+  "compression": "EXT_meshopt_compression",
+  "textures": "none",
+  "regions": [
+    "region_head",
+    "region_chest",
+    "region_back",
+    "region_core",
+    "region_left_arm",
+    "region_right_arm",
+    "region_left_leg",
+    "region_right_leg"
+  ]
+}
