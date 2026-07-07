@@ -14,6 +14,7 @@
     "check:body-model": "node scripts/body-model/check-body-model.mjs",
     "smoke:staging": "node scripts/staging/smoke-test.mjs",
     "e2e:staging": "node scripts/staging/e2e-check.mjs",
+    "validate:release-review": "node scripts/release/validate-release-review.mjs",
     "generate:api-contract": "npm --workspace @project-mt/api-contract run generate",
     "check:api-contract": "npm --workspace @project-mt/api-contract run check"
   },

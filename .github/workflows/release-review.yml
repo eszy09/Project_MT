@@ -1,0 +1,64 @@
+name: Production Release Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_candidate:
+        description: Commit SHA, image tag, or release candidate identifier being approved.
+        required: true
+        type: string
+      owner_approval:
+        description: Type "I approve this Project_MT production release" to approve.
+        required: true
+        type: string
+      backup_restore_evidence:
+        description: Link or reference proving backup restoration was tested.
+        required: true
+        type: string
+      incident_drill_evidence:
+        description: Link or reference proving incident procedure was tested.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  release-review:
+    name: Validate production release review
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate release review evidence
+        env:
+          RELEASE_CANDIDATE: ${{ inputs.release_candidate }}
+          OWNER_APPROVAL: ${{ inputs.owner_approval }}
+          BACKUP_RESTORE_EVIDENCE: ${{ inputs.backup_restore_evidence }}
+          INCIDENT_DRILL_EVIDENCE: ${{ inputs.incident_drill_evidence }}
+        run: node scripts/release/validate-release-review.mjs
+
+      - name: Check web dependencies against approved threshold
+        run: npm audit --audit-level=high
+
+      - name: Run release web quality gate
+        run: |
+          npm run format:check:web
+          npm run lint:web
+          npm run typecheck:web
+          npm run test:web
+          npm run build:web
