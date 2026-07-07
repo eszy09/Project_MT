@@ -20,6 +20,7 @@
 - [Body check-in data policy](data/BODY_CHECKINS.md)
 - [Body model asset pipeline](data/BODY_MODEL_ASSET_PIPELINE.md)
 - [Body model accessibility contract](data/BODY_MODEL_ACCESSIBILITY.md)
+- [Private journal data policy](data/JOURNAL_PRIVACY.md)
 - [Media upload](sequences/MEDIA_UPLOAD.md)
 
 ## Data model
