@@ -47,6 +47,9 @@ jobs:
       - name: Run web tests
         run: npm run test:web
 
+      - name: Verify body model asset
+        run: npm run check:body-model
+
       - name: Build web application
         run: npm run build:web
 

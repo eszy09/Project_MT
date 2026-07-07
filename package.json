@@ -10,6 +10,8 @@
     "format:web": "npm --workspace @project-mt/web run format",
     "format:check:web": "npm --workspace @project-mt/web run format:check",
     "test:web": "npm --workspace @project-mt/web run test",
+    "build:body-model": "node scripts/body-model/build-body-model.mjs",
+    "check:body-model": "node scripts/body-model/check-body-model.mjs",
     "generate:api-contract": "npm --workspace @project-mt/api-contract run generate",
     "check:api-contract": "npm --workspace @project-mt/api-contract run check"
   },
@@ -25,5 +27,10 @@
   "workspaces": [
     "apps/web",
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "@cocos/fbx2gltf": "^1.0.8",
+    "@comfyorg/fbx-exporter-three": "^1.0.1",
+    "@gltf-transform/cli": "^4.4.1"
+  }
 }

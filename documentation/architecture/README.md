@@ -18,6 +18,7 @@
 - [Workout lifecycle](sequences/WORKOUT_LIFECYCLE.md)
 - [Check-in and body model](sequences/CHECKIN_BODY_MODEL.md)
 - [Body check-in data policy](data/BODY_CHECKINS.md)
+- [Body model asset pipeline](data/BODY_MODEL_ASSET_PIPELINE.md)
 - [Media upload](sequences/MEDIA_UPLOAD.md)
 
 ## Data model

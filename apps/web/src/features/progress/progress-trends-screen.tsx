@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BodyModelCard } from "@/features/body-model";
 import type { ProgressTrends, TrendSeries } from "./progress-trends";
 
 export function ProgressTrendsScreen({
@@ -73,6 +74,8 @@ export function ProgressTrendsScreen({
           )}
         </div>
       )}
+
+      <BodyModelCard />
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2">
         {series.map((trend) => (
