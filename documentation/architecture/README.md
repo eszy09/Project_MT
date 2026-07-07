@@ -35,6 +35,7 @@
 - [Production](deployment/03_PRODUCTION.md)
 - [Scaling](deployment/04_SCALING.md)
 - [Container images](deployment/CONTAINER_IMAGES.md)
+- [Staging deployment pipeline](deployment/STAGING_PIPELINE.md)
 
 ## Architecture decisions
 
@@ -51,4 +52,3 @@
 - ADRs explain why a consequential decision was made.
 
 Mermaid is used so diagrams render in GitHub and remain editable as text. Structurizr DSL may later become the canonical C4 source if automated architecture validation is required.
-
