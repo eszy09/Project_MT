@@ -71,6 +71,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/journal/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["get_1"];
+        readonly put: operations["update_1"];
+        readonly post?: never;
+        readonly delete: operations["delete_1"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/workouts": {
         readonly parameters: {
             readonly query?: never;
@@ -157,7 +173,7 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/checkins": {
+    readonly "/api/v1/journal": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -173,6 +189,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/checkins": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["list_2"];
+        readonly put?: never;
+        readonly post: operations["create_2"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/profiles/{profileId}": {
         readonly parameters: {
             readonly query?: never;
@@ -181,15 +213,15 @@ export interface paths {
             readonly cookie?: never;
         };
         /** Get an owned user profile */
-        readonly get: operations["get_1"];
+        readonly get: operations["get_2"];
         readonly put?: never;
         readonly post?: never;
         /** Delete an owned user profile */
-        readonly delete: operations["delete_1"];
+        readonly delete: operations["delete_2"];
         readonly options?: never;
         readonly head?: never;
         /** Update an owned user profile */
-        readonly patch: operations["update_1"];
+        readonly patch: operations["update_2"];
         readonly trace?: never;
     };
     readonly "/api/v1": {
@@ -254,7 +286,7 @@ export interface paths {
             readonly cookie?: never;
         };
         /** Get the current user's onboarding draft */
-        readonly get: operations["get_2"];
+        readonly get: operations["get_3"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -270,7 +302,7 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["get_3"];
+        readonly get: operations["get_4"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -386,6 +418,23 @@ export interface components {
             readonly experienceLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
             readonly heightCm?: number;
             readonly weightKg?: number;
+        };
+        readonly JournalRequest: {
+            readonly title: string;
+            readonly content: string;
+        };
+        readonly JournalResponse: {
+            /** Format: uuid */
+            readonly id?: string;
+            readonly title?: string;
+            readonly content?: string;
+            readonly visibility?: string;
+            /** Format: int32 */
+            readonly version?: number;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
         };
         readonly WorkoutExerciseRequest: {
             readonly exerciseCode: string;
@@ -773,6 +822,76 @@ export interface operations {
             };
         };
     };
+    readonly get_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["JournalResponse"];
+                };
+            };
+        };
+    };
+    readonly update_1: {
+        readonly parameters: {
+            readonly query: {
+                readonly version: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["JournalRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["JournalResponse"];
+                };
+            };
+        };
+    };
+    readonly delete_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description No Content */
+            readonly 204: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     readonly history: {
         readonly parameters: {
             readonly query?: {
@@ -971,12 +1090,56 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "application/json": readonly components["schemas"]["BodyCheckinResponse"][];
+                    readonly "application/json": readonly components["schemas"]["JournalResponse"][];
                 };
             };
         };
     };
     readonly create_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["JournalRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["JournalResponse"];
+                };
+            };
+        };
+    };
+    readonly list_2: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": readonly components["schemas"]["BodyCheckinResponse"][];
+                };
+            };
+        };
+    };
+    readonly create_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -1000,7 +1163,7 @@ export interface operations {
             };
         };
     };
-    readonly get_1: {
+    readonly get_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -1024,7 +1187,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly delete_1: {
+    readonly delete_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -1046,7 +1209,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly update_1: {
+    readonly update_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -1145,7 +1308,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly get_2: {
+    readonly get_3: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -1167,7 +1330,7 @@ export interface operations {
             readonly 404: components["responses"]["ResourceNotFoundProblem"];
         };
     };
-    readonly get_3: {
+    readonly get_4: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
