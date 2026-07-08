@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
+import { Badge, Surface } from "@/components";
 import { exerciseCatalog } from "@/features/workouts/exercise-catalog";
 import type { Routine, RoutineInput } from "@/services";
 import { changeRoutineStateAction, saveRoutineAction } from "./routine-actions";
@@ -87,18 +88,37 @@ export function RoutineManager({
 
   return (
     <section className="w-full">
-      <Link href="/dashboard" className="text-sm text-slate-400">
+      <Link
+        href="/dashboard"
+        className="text-sm font-bold text-slate-400 transition hover:text-white"
+      >
         ← Dashboard
       </Link>
-      <h1 className="mt-4 text-4xl font-bold">Routines</h1>
-      <p className="mt-2 text-slate-300">
-        Build ordered templates that become independent workout drafts.
-      </p>
+      <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+          <Badge>Routine builder</Badge>
+          <h1 className="mt-5 text-5xl font-black tracking-[-0.05em] sm:text-6xl">
+            Routines
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
+            Build ordered templates that become independent workout drafts. Keep
+            the structure reusable while each workout remains its own record.
+          </p>
+        </div>
+        <Surface className="p-5">
+          <p className="text-xs font-black tracking-[0.18em] text-slate-500 uppercase">
+            Templates
+          </p>
+          <p className="mt-2 text-4xl font-black tracking-tight">
+            {routines.length}
+          </p>
+        </Surface>
+      </div>
 
       {error && (
         <p
           role="alert"
-          className="mt-4 rounded-xl bg-amber-300/10 p-4 text-amber-200"
+          className="mt-5 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 font-semibold text-amber-200"
         >
           {error}
         </p>
@@ -106,7 +126,7 @@ export function RoutineManager({
       {success && (
         <p
           role="status"
-          className="mt-4 rounded-xl bg-emerald-300/10 p-4 text-emerald-200"
+          className="mt-5 rounded-2xl border border-lime-300/30 bg-lime-300/10 p-4 font-semibold text-lime-200"
         >
           {success}
         </p>
@@ -131,43 +151,49 @@ export function RoutineManager({
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {routines.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center lg:col-span-2">
-            <h2 className="text-xl font-bold">No routines yet</h2>
-            <p className="mt-2 text-slate-400">
+          <Surface className="border-dashed p-10 text-center lg:col-span-2">
+            <h2 className="text-2xl font-black tracking-tight">
+              No routines yet
+            </h2>
+            <p className="mt-3 text-slate-400">
               Create your first reusable training plan above.
             </p>
-          </div>
+          </Surface>
         )}
 
         {routines.map((routine) => (
           <article
             key={routine.id}
-            className="rounded-2xl border border-white/10 bg-slate-900/60 p-5"
+            className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/20"
           >
             <div className="flex justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold">{routine.name}</h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <h2 className="text-2xl font-black tracking-tight">
+                  {routine.name}
+                </h2>
+                <p className="mt-1 text-sm font-bold text-violet-200">
                   {routine.muscleGroup?.replace("_", " ")}
                 </p>
               </div>
               {routine.archivedAt && (
-                <span className="text-xs text-amber-300">Archived</span>
+                <span className="h-fit rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs font-black text-amber-200">
+                  Archived
+                </span>
               )}
             </div>
             {routine.description && (
-              <p className="mt-3 text-sm text-slate-300">
+              <p className="mt-4 text-sm leading-6 text-slate-300">
                 {routine.description}
               </p>
             )}
-            <details className="mt-4 rounded-xl border border-white/10 p-3">
-              <summary className="cursor-pointer font-semibold">
+            <details className="mt-5 rounded-3xl border border-white/10 bg-slate-950/35 p-4">
+              <summary className="cursor-pointer font-black">
                 View {routine.exercises?.length ?? 0} exercises
               </summary>
-              <ol className="mt-3 space-y-3">
+              <ol className="mt-4 space-y-3">
                 {(routine.exercises ?? []).map((exercise) => (
                   <li key={exercise.position}>
-                    <p className="font-semibold">
+                    <p className="font-black">
                       {exercise.position}. {exercise.displayName}
                     </p>
                     <p className="text-xs text-slate-400">
@@ -186,7 +212,7 @@ export function RoutineManager({
               {!routine.archivedAt && routine.id && (
                 <Link
                   href={`/workouts/active?routineId=${routine.id}`}
-                  className="rounded-lg bg-emerald-300 px-4 py-2 font-bold text-slate-950"
+                  className="rounded-2xl bg-lime-300 px-4 py-2 font-black text-slate-950 shadow-lg shadow-lime-500/20 transition hover:bg-lime-200"
                 >
                   Start
                 </Link>
@@ -195,7 +221,7 @@ export function RoutineManager({
                 <button
                   type="button"
                   onClick={() => setEditing(routine)}
-                  className="rounded-lg border px-4 py-2"
+                  className="rounded-2xl border border-white/15 px-4 py-2 font-bold transition hover:bg-white/10"
                 >
                   Edit
                 </button>
@@ -209,7 +235,7 @@ export function RoutineManager({
                     routine.archivedAt ? "restore" : "archive",
                   )
                 }
-                className="rounded-lg border px-4 py-2 disabled:opacity-50"
+                className="rounded-2xl border border-white/15 px-4 py-2 font-bold transition hover:bg-white/10 disabled:opacity-50"
               >
                 {busyId === routine.id
                   ? "Working…"
@@ -222,7 +248,7 @@ export function RoutineManager({
                   type="button"
                   disabled={busyId === routine.id}
                   onClick={() => void mutate(routine, "delete")}
-                  className="rounded-lg border border-red-300/30 px-4 py-2 text-red-200 disabled:opacity-50"
+                  className="rounded-2xl border border-red-300/30 px-4 py-2 font-bold text-red-200 transition hover:bg-red-300/10 disabled:opacity-50"
                 >
                   Delete
                 </button>
@@ -288,7 +314,7 @@ function RoutineEditor({
 
   return (
     <form
-      className="mt-8 space-y-4 rounded-2xl border border-white/10 p-5"
+      className="mt-8 space-y-5 rounded-[2rem] border border-lime-300/20 bg-lime-300/[0.06] p-5 shadow-xl shadow-black/20"
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -330,18 +356,27 @@ function RoutineEditor({
         });
       }}
     >
+      <div>
+        <p className="text-xs font-black tracking-[0.18em] text-lime-200 uppercase">
+          {editing ? "Edit template" : "Create template"}
+        </p>
+        <h2 className="mt-2 text-2xl font-black tracking-tight">
+          {editing ? `Editing ${editing.name}` : "Build a reusable routine"}
+        </h2>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
         <input
           required
           name="name"
           defaultValue={editing?.name}
           placeholder="Routine name"
-          className="min-h-11 rounded-lg bg-slate-950 px-3"
+          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70"
         />
         <select
           name="muscleGroup"
           defaultValue={editing?.muscleGroup ?? "FULL_BODY"}
-          className="min-h-11 rounded-lg bg-slate-950 px-3"
+          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70"
         >
           {[
             "CHEST",
@@ -359,7 +394,7 @@ function RoutineEditor({
           name="description"
           defaultValue={editing?.description}
           placeholder="Description"
-          className="min-h-11 rounded-lg bg-slate-950 px-3 sm:col-span-2"
+          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70 sm:col-span-2"
         />
       </div>
 
@@ -367,10 +402,12 @@ function RoutineEditor({
         {exercises.map((exercise, exerciseIndex) => (
           <li
             key={exercise.key}
-            className="rounded-xl border border-white/10 bg-slate-900/60 p-4"
+            className="rounded-3xl border border-white/10 bg-slate-950/45 p-4"
           >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold">{exerciseIndex + 1}</span>
+              <span className="grid size-9 place-items-center rounded-2xl bg-violet-400/15 font-black text-violet-100">
+                {exerciseIndex + 1}
+              </span>
               <select
                 aria-label={`Exercise ${exerciseIndex + 1}`}
                 value={exercise.exerciseCode}
@@ -380,7 +417,7 @@ function RoutineEditor({
                     exerciseCode: event.target.value,
                   }))
                 }
-                className="min-h-11 min-w-48 flex-1 rounded-lg bg-slate-950 px-3"
+                className="min-h-12 min-w-48 flex-1 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70"
               >
                 {exerciseCatalog.map((item) => (
                   <option key={item.code} value={item.code}>
@@ -402,16 +439,16 @@ function RoutineEditor({
                     items.filter((_, index) => index !== exerciseIndex),
                   )
                 }
-                className="min-h-11 rounded-lg px-3 text-red-200 disabled:opacity-30"
+                className="min-h-11 rounded-2xl px-3 font-bold text-red-200 transition hover:bg-red-300/10 disabled:opacity-30"
               >
                 Remove
               </button>
             </div>
 
-            <ol className="mt-3 space-y-2">
+            <ol className="mt-4 space-y-2">
               {exercise.sets.map((set, setIndex) => (
                 <li key={set.key} className="flex flex-wrap items-center gap-2">
-                  <span className="w-6 text-sm text-slate-400">
+                  <span className="w-6 text-sm font-bold text-slate-400">
                     {setIndex + 1}
                   </span>
                   <input
@@ -427,7 +464,7 @@ function RoutineEditor({
                       })
                     }
                     placeholder="kg"
-                    className="min-h-11 w-24 rounded-lg bg-slate-950 px-3"
+                    className="min-h-11 w-24 rounded-2xl border border-white/10 bg-slate-950 px-3"
                   />
                   <input
                     required
@@ -442,7 +479,7 @@ function RoutineEditor({
                       })
                     }
                     placeholder="reps"
-                    className="min-h-11 w-24 rounded-lg bg-slate-950 px-3"
+                    className="min-h-11 w-24 rounded-2xl border border-white/10 bg-slate-950 px-3"
                   />
                   <OrderButtons
                     label={`exercise ${exerciseIndex + 1} set ${setIndex + 1}`}
@@ -463,7 +500,7 @@ function RoutineEditor({
                         ),
                       }))
                     }
-                    className="min-h-11 px-2 text-red-200 disabled:opacity-30"
+                    className="min-h-11 rounded-2xl px-2 font-bold text-red-200 transition hover:bg-red-300/10 disabled:opacity-30"
                   >
                     Remove set
                   </button>
@@ -478,7 +515,7 @@ function RoutineEditor({
                   sets: [...current.sets, newSet()],
                 }))
               }
-              className="mt-3 min-h-11 text-sm font-semibold text-emerald-300"
+              className="mt-3 min-h-11 rounded-2xl px-3 text-sm font-black text-lime-200 transition hover:bg-lime-300/10"
             >
               + Add set
             </button>
@@ -489,14 +526,14 @@ function RoutineEditor({
       <button
         type="button"
         onClick={() => setExercises((items) => [...items, newExercise()])}
-        className="min-h-11 rounded-lg border border-emerald-300/30 px-4 text-emerald-200"
+        className="min-h-11 rounded-2xl border border-lime-300/30 px-4 font-black text-lime-200 transition hover:bg-lime-300/10"
       >
         + Add exercise
       </button>
       <div className="flex flex-wrap gap-3">
         <button
           disabled={saving}
-          className="min-h-11 rounded-lg bg-emerald-300 px-6 font-bold text-slate-950 disabled:opacity-50"
+          className="min-h-12 rounded-2xl bg-lime-300 px-6 font-black text-slate-950 shadow-lg shadow-lime-500/20 transition hover:bg-lime-200 disabled:opacity-50"
         >
           {saving ? "Saving…" : editing ? "Update routine" : "Create routine"}
         </button>
@@ -504,7 +541,7 @@ function RoutineEditor({
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-11 rounded-lg border px-5"
+            className="min-h-12 rounded-2xl border border-white/15 px-5 font-bold transition hover:bg-white/10"
           >
             Cancel editing
           </button>
@@ -532,7 +569,7 @@ function OrderButtons({
         disabled={first}
         aria-label={`Move ${label} up`}
         onClick={() => onMove(-1)}
-        className="size-11 disabled:opacity-30"
+        className="size-11 rounded-2xl font-black transition hover:bg-white/10 disabled:opacity-30"
       >
         ↑
       </button>
@@ -541,7 +578,7 @@ function OrderButtons({
         disabled={last}
         aria-label={`Move ${label} down`}
         onClick={() => onMove(1)}
-        className="size-11 disabled:opacity-30"
+        className="size-11 rounded-2xl font-black transition hover:bg-white/10 disabled:opacity-30"
       >
         ↓
       </button>
