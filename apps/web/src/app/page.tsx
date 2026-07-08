@@ -27,7 +27,9 @@ export default function HomePage() {
         description="Project_MT is a visual-first strength-training and body-recomposition platform built around workouts, check-ins, and meaningful progress signals."
       >
         <div className="hidden min-w-72 rounded-[2rem] border border-violet-300/25 bg-violet-400/10 p-5 lg:block">
-          <p className="text-sm font-bold text-violet-100">Today&apos;s intent</p>
+          <p className="text-sm font-bold text-violet-100">
+            Today&apos;s intent
+          </p>
           <p className="mt-3 text-3xl font-black tracking-tight text-white">
             Lift. Log. Learn.
           </p>

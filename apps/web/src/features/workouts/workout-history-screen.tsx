@@ -117,7 +117,7 @@ export function WorkoutHistoryScreen({
             <select
               name="exercise"
               defaultValue={formValues.exercise ?? ""}
-              className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/80 px-3 outline-none transition focus:border-lime-300/70"
+              className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/80 px-3 transition outline-none focus:border-lime-300/70"
             >
               <option value="">All exercises</option>
               {exerciseCatalog.map((exercise) => (
@@ -301,13 +301,19 @@ function DateFilter({
         type="date"
         name={name}
         defaultValue={value}
-        className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/80 px-3 outline-none transition focus:border-lime-300/70"
+        className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/80 px-3 transition outline-none focus:border-lime-300/70"
       />
     </label>
   );
 }
 
-function SummaryCard({ label, value }: { label: string; value: string | number }) {
+function SummaryCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-5">
       <p className="text-xs font-black tracking-[0.18em] text-slate-500 uppercase">
@@ -348,4 +354,3 @@ function formatNumber(value?: number) {
     maximumFractionDigits: 1,
   }).format(value ?? 0);
 }
-
