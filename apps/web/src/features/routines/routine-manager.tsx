@@ -371,12 +371,12 @@ function RoutineEditor({
           name="name"
           defaultValue={editing?.name}
           placeholder="Routine name"
-          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold outline-none transition focus:border-lime-300/70"
+          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70"
         />
         <select
           name="muscleGroup"
           defaultValue={editing?.muscleGroup ?? "FULL_BODY"}
-          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold outline-none transition focus:border-lime-300/70"
+          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70"
         >
           {[
             "CHEST",
@@ -394,7 +394,7 @@ function RoutineEditor({
           name="description"
           defaultValue={editing?.description}
           placeholder="Description"
-          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold outline-none transition focus:border-lime-300/70 sm:col-span-2"
+          className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70 sm:col-span-2"
         />
       </div>
 
@@ -417,7 +417,7 @@ function RoutineEditor({
                     exerciseCode: event.target.value,
                   }))
                 }
-                className="min-h-12 min-w-48 flex-1 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold outline-none transition focus:border-lime-300/70"
+                className="min-h-12 min-w-48 flex-1 rounded-2xl border border-white/10 bg-slate-950/80 px-4 font-semibold transition outline-none focus:border-lime-300/70"
               >
                 {exerciseCatalog.map((item) => (
                   <option key={item.code} value={item.code}>
