@@ -8,7 +8,11 @@ type SurfaceProps = ComponentPropsWithoutRef<"div"> & {
   tone?: "default" | "active" | "danger";
 };
 
-export function Surface({ tone = "default", className, ...props }: SurfaceProps) {
+export function Surface({
+  tone = "default",
+  className,
+  ...props
+}: SurfaceProps) {
   return (
     <div
       className={cn(
@@ -24,7 +28,10 @@ export function Surface({ tone = "default", className, ...props }: SurfaceProps)
   );
 }
 
-export function Badge({ className, ...props }: ComponentPropsWithoutRef<"span">) {
+export function Badge({
+  className,
+  ...props
+}: ComponentPropsWithoutRef<"span">) {
   return (
     <span
       className={cn(

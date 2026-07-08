@@ -154,7 +154,7 @@ function ProfileStage({ displayName }: { displayName: string }) {
         maxLength={100}
         defaultValue={displayName}
         autoComplete="name"
-        className="mt-3 w-full rounded-2xl border border-white/15 bg-slate-950/80 px-4 py-4 text-lg font-semibold shadow-inner shadow-black/20 outline-none transition focus:border-lime-300/70"
+        className="mt-3 w-full rounded-2xl border border-white/15 bg-slate-950/80 px-4 py-4 text-lg font-semibold shadow-inner shadow-black/20 transition outline-none focus:border-lime-300/70"
       />
       <FormFooter state={state} pending={pending} label="Save and continue" />
     </form>
@@ -248,7 +248,7 @@ function BodyContextStage({ draft }: { draft: OnboardingDraft | null }) {
         id="experienceLevel"
         name="experienceLevel"
         defaultValue={draft?.experienceLevel ?? ""}
-        className="mt-3 w-full rounded-2xl border border-white/15 bg-slate-950/80 px-4 py-4 font-semibold outline-none transition focus:border-lime-300/70"
+        className="mt-3 w-full rounded-2xl border border-white/15 bg-slate-950/80 px-4 py-4 font-semibold transition outline-none focus:border-lime-300/70"
       >
         <option value="">Prefer not to say</option>
         {experienceLevelOptions.map((option) => (
@@ -275,10 +275,9 @@ function BodyContextStage({ draft }: { draft: OnboardingDraft | null }) {
         />
       </div>
       <aside className="mt-6 rounded-3xl border border-cyan-300/20 bg-cyan-400/10 p-5 text-sm leading-6 text-slate-300">
-        <strong className="text-cyan-200">Why we ask:</strong> body
-        measurements can improve progress context and future exercise guidance.
-        They are private, optional, and are not used to diagnose health
-        conditions.
+        <strong className="text-cyan-200">Why we ask:</strong> body measurements
+        can improve progress context and future exercise guidance. They are
+        private, optional, and are not used to diagnose health conditions.
       </aside>
       <FormFooter state={state} pending={pending} label="Save and review" />
     </form>
@@ -363,7 +362,7 @@ function MeasurementField({
         max={max}
         step="0.1"
         defaultValue={value ?? ""}
-        className="mt-3 w-full rounded-2xl border border-white/15 bg-slate-950/80 px-4 py-4 font-semibold outline-none transition focus:border-lime-300/70"
+        className="mt-3 w-full rounded-2xl border border-white/15 bg-slate-950/80 px-4 py-4 font-semibold transition outline-none focus:border-lime-300/70"
       />
     </label>
   );
