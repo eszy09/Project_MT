@@ -1,4 +1,5 @@
-import Link from "next/link";
+﻿import Link from "next/link";
+import { Badge, Surface } from "@/components";
 import { BodyModelCard } from "@/features/body-model";
 import type { ProgressTrends, TrendSeries } from "./progress-trends";
 
@@ -22,51 +23,52 @@ export function ProgressTrendsScreen({
     <section className="w-full">
       <Link
         href="/dashboard"
-        className="text-sm font-semibold text-slate-400 hover:text-white"
+        className="text-sm font-bold text-slate-400 transition hover:text-white"
       >
         ← Dashboard
       </Link>
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-5">
+      <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
         <div>
-          <p className="text-sm font-semibold tracking-widest text-emerald-300 uppercase">
-            Progress
-          </p>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight">
+          <Badge>Progress command view</Badge>
+          <h1 className="mt-5 text-5xl font-black tracking-[-0.05em] sm:text-6xl">
             Understand your trends
           </h1>
-          <p className="mt-3 max-w-2xl text-slate-300">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
             These summaries describe recorded changes and training consistency.
             They do not diagnose health conditions or claim medical causation.
           </p>
         </div>
-        <form className="flex items-end gap-3">
-          <label className="text-sm">
-            <span className="mb-2 block text-slate-400">Date range</span>
-            <select
-              name="days"
-              defaultValue={selectedDays}
-              className="min-h-11 rounded-lg border border-white/15 bg-slate-950 px-3"
+        <Surface className="p-4">
+          <form className="flex items-end gap-3">
+            <label className="text-sm font-bold">
+              <span className="mb-2 block text-slate-400">Date range</span>
+              <select
+                name="days"
+                defaultValue={selectedDays}
+                className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-3 transition outline-none focus:border-lime-300/70"
+              >
+                <option value={30}>Last 30 days</option>
+                <option value={90}>Last 90 days</option>
+                <option value={180}>Last 180 days</option>
+              </select>
+            </label>
+            <button
+              type="submit"
+              className="min-h-12 rounded-2xl border border-lime-300/30 bg-lime-300/10 px-4 font-black text-lime-200 transition hover:bg-lime-300/15"
             >
-              <option value={30}>Last 30 days</option>
-              <option value={90}>Last 90 days</option>
-              <option value={180}>Last 180 days</option>
-            </select>
-          </label>
-          <button
-            type="submit"
-            className="min-h-11 rounded-lg border border-emerald-300/30 px-4 font-semibold text-emerald-200"
-          >
-            Update
-          </button>
-        </form>
+              Update
+            </button>
+          </form>
+        </Surface>
       </div>
 
       {error && (
         <div
           role="alert"
-          className="mt-6 rounded-xl border border-amber-300/30 bg-amber-300/10 p-4 text-amber-100"
+          className="mt-6 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-amber-100"
         >
-          <p>{error.message}</p>
+          <p className="font-bold">Progress needs attention</p>
+          <p className="mt-1">{error.message}</p>
           {error.requestId && (
             <p className="mt-2 font-mono text-xs">
               Reference: {error.requestId}
@@ -92,30 +94,36 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
   const coordinates = chartCoordinates(trend.points);
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+    <article className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/20">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 id={titleId} className="text-xl font-bold">
+          <h2 id={titleId} className="text-2xl font-black tracking-tight">
             {trend.title}
           </h2>
           <p className="mt-1 text-sm text-slate-400">{trend.dateRange}</p>
         </div>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-300">
+        <span className="rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-1 text-xs font-black text-violet-100">
           {trend.unit}
         </span>
       </div>
 
       {trend.limitedMessage ? (
-        <div className="mt-5 flex min-h-48 items-center justify-center rounded-xl border border-dashed border-white/15 p-6 text-center text-slate-400">
+        <div className="mt-5 flex min-h-48 items-center justify-center rounded-3xl border border-dashed border-white/15 bg-slate-950/35 p-6 text-center text-slate-400">
           <p>{trend.limitedMessage}</p>
         </div>
       ) : (
         <svg
           viewBox="0 0 600 220"
-          className="mt-5 h-52 w-full"
+          className="mt-5 h-52 w-full overflow-visible"
           role="img"
           aria-labelledby={`${titleId} ${summaryId}`}
         >
+          <defs>
+            <linearGradient id={`${trend.id}-line`} x1="0" x2="1" y1="0" y2="0">
+              <stop stopColor="#bef264" />
+              <stop offset="1" stopColor="#a78bfa" />
+            </linearGradient>
+          </defs>
           <path
             d="M40 20V190H580"
             fill="none"
@@ -125,7 +133,7 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
           <polyline
             points={coordinates}
             fill="none"
-            stroke="#6ee7b7"
+            stroke={`url(#${trend.id}-line)`}
             strokeWidth="5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -133,7 +141,15 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
           {coordinates.split(" ").map((coordinate) => {
             const [x, y] = coordinate.split(",");
             return (
-              <circle key={coordinate} cx={x} cy={y} r="6" fill="#6ee7b7" />
+              <circle
+                key={coordinate}
+                cx={x}
+                cy={y}
+                r="6"
+                fill="#bef264"
+                stroke="#03040b"
+                strokeWidth="3"
+              />
             );
           })}
         </svg>
@@ -143,7 +159,7 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
         id={summaryId}
         className="mt-4 border-t border-white/10 pt-4 text-sm leading-6 text-slate-300"
       >
-        <span className="font-semibold text-white">Text summary: </span>
+        <span className="font-black text-white">Text summary: </span>
         {trend.summary}
       </p>
     </article>

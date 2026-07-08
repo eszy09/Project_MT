@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import dynamic from "next/dynamic";
 import {
@@ -57,13 +57,15 @@ export function BodyModelCard() {
   return (
     <article
       ref={container}
-      className="mt-8 rounded-2xl border border-emerald-300/20 bg-emerald-300/5 p-5"
+      className="mt-8 overflow-hidden rounded-[2rem] border border-lime-300/20 bg-lime-300/[0.06] p-5 shadow-2xl shadow-black/20"
     >
       <div>
-        <p className="text-sm font-semibold text-emerald-200">
+        <p className="text-sm font-black tracking-[0.18em] text-lime-200 uppercase">
           Approximate visualization
         </p>
-        <h2 className="mt-1 text-2xl font-bold">Interactive body model</h2>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">
+          Interactive body model
+        </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
           Rotate and zoom the model to understand its regions. This is a visual
           aid based on recorded measurements, not a clinical body scan. The
@@ -114,7 +116,7 @@ export function BodyModelLoading({
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-96 items-center justify-center rounded-xl bg-slate-950/70 p-6 text-slate-300"
+      className="flex min-h-96 items-center justify-center rounded-3xl border border-white/10 bg-slate-950/70 p-6 text-slate-300"
     >
       {message}
     </div>
@@ -149,7 +151,7 @@ class BodyModelErrorBoundary extends Component<
         <button
           type="button"
           onClick={this.props.onRetry}
-          className="mx-auto mt-3 block min-h-11 rounded-lg border border-white/15 px-4 font-semibold"
+          className="mx-auto mt-3 block min-h-11 rounded-2xl border border-white/15 px-4 font-black transition hover:bg-white/10"
         >
           Retry interactive model
         </button>
