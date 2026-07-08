@@ -260,14 +260,14 @@ export function ActiveWorkoutScreen({
         <div>
           <Link
             href="/dashboard"
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg px-1 text-sm font-semibold text-slate-300 hover:text-white"
+            className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-1 text-sm font-bold text-slate-400 transition hover:text-white"
           >
             <ArrowLeftIcon />
             Dashboard
           </Link>
           <div className="mt-4 flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-bold tracking-wider text-emerald-200 uppercase">
-              <span className="size-2 rounded-full bg-emerald-300 motion-safe:animate-pulse" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1 text-xs font-black tracking-[0.18em] text-lime-200 uppercase">
+              <span className="size-2 rounded-full bg-lime-300 shadow shadow-lime-300/40 motion-safe:animate-pulse" />
               Active
             </span>
             <span
@@ -277,7 +277,7 @@ export function ActiveWorkoutScreen({
               {formatDuration(elapsedSeconds)}
             </span>
           </div>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="mt-3 text-5xl font-black tracking-[-0.05em] sm:text-6xl">
             Today&apos;s workout
           </h1>
           <p className="mt-2 max-w-2xl text-slate-300">
@@ -289,7 +289,7 @@ export function ActiveWorkoutScreen({
         <button
           type="button"
           onClick={discardWorkout}
-          className="min-h-11 rounded-lg border border-red-300/25 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-300/10"
+          className="min-h-11 rounded-2xl border border-red-300/25 bg-red-300/5 px-4 py-2 text-sm font-bold text-red-200 transition hover:bg-red-300/10"
         >
           Discard workout
         </button>
@@ -321,7 +321,7 @@ export function ActiveWorkoutScreen({
               ref={addExerciseButtonRef}
               type="button"
               onClick={() => setPickerOpen(true)}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-emerald-300 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-200"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-lime-300 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-lime-500/20 transition hover:bg-lime-200"
             >
               <PlusIcon />
               Add exercise
@@ -331,7 +331,7 @@ export function ActiveWorkoutScreen({
           {state.error && (
             <div
               role="alert"
-              className="mt-5 flex items-start justify-between gap-4 rounded-xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100"
+              className="mt-5 flex items-start justify-between gap-4 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100"
             >
               <div>
                 <p className="font-semibold">Workout needs attention</p>
@@ -356,7 +356,7 @@ export function ActiveWorkoutScreen({
           {storageWarning && (
             <div
               role="status"
-              className="mt-5 rounded-xl border border-sky-300/25 bg-sky-300/10 p-4 text-sm text-sky-100"
+              className="mt-5 rounded-2xl border border-cyan-300/25 bg-cyan-400/10 p-4 text-sm text-cyan-100"
             >
               <p className="font-semibold">Recovery notice</p>
               <p className="mt-1 text-sky-100/80">{storageWarning}</p>
@@ -448,8 +448,8 @@ export function ActiveWorkoutScreen({
           )}
         </div>
 
-        <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
-          <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+        <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/20">
             <h2 className="font-bold">Session notes</h2>
             <label htmlFor="workout-notes" className="sr-only">
               Private workout notes
@@ -466,14 +466,14 @@ export function ActiveWorkoutScreen({
               maxLength={2000}
               rows={5}
               placeholder="How did the session feel?"
-              className="mt-3 w-full resize-y rounded-xl border border-white/10 bg-slate-950 p-3 text-sm placeholder:text-slate-600"
+              className="mt-3 w-full resize-y rounded-2xl border border-white/10 bg-slate-950/80 p-3 text-sm transition outline-none placeholder:text-slate-600 focus:border-lime-300/70"
             />
             <p className="mt-2 text-right text-xs text-slate-500">
               {state.notes.length}/2000
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 p-5">
+          <div className="rounded-[2rem] border border-violet-300/20 bg-violet-400/10 p-5">
             <h2 className="font-bold">Ready to finish?</h2>
             <ul className="mt-3 space-y-3 text-sm text-slate-300">
               <ReadinessItem
@@ -492,7 +492,7 @@ export function ActiveWorkoutScreen({
         </aside>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-slate-950/95 px-4 py-3 shadow-2xl backdrop-blur sm:px-6">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#03040b]/90 px-4 py-3 shadow-2xl shadow-black/40 backdrop-blur-xl sm:px-6">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
           <p className="hidden text-sm text-slate-400 sm:block">
             {state.dirty
@@ -503,7 +503,7 @@ export function ActiveWorkoutScreen({
             type="button"
             disabled={state.status === "saving"}
             onClick={() => void completeWorkout()}
-            className="min-h-12 w-full rounded-xl bg-white px-6 py-3 font-bold text-slate-950 hover:bg-slate-200 disabled:cursor-wait disabled:opacity-60 sm:ml-auto sm:w-auto"
+            className="min-h-12 w-full rounded-2xl bg-lime-300 px-6 py-3 font-black text-slate-950 shadow-lg shadow-lime-500/20 transition hover:bg-lime-200 disabled:cursor-wait disabled:opacity-60 sm:ml-auto sm:w-auto"
           >
             {state.status === "saving"
               ? "Saving workout..."
@@ -545,8 +545,8 @@ export function ActiveWorkoutScreen({
 
 function EmptyWorkout({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[0.025] px-6 py-14 text-center">
-      <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-300/10 text-emerald-300">
+    <div className="mt-5 rounded-[2rem] border border-dashed border-lime-300/25 bg-lime-300/[0.045] px-6 py-14 text-center shadow-xl shadow-black/20">
+      <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-lime-300/10 text-lime-300">
         <DumbbellIcon />
       </div>
       <h2 className="mt-5 text-xl font-bold">Start with your first exercise</h2>
@@ -557,7 +557,7 @@ function EmptyWorkout({ onAdd }: { onAdd: () => void }) {
       <button
         type="button"
         onClick={onAdd}
-        className="mt-6 min-h-11 rounded-lg border border-emerald-300/30 px-4 py-2 font-semibold text-emerald-200 hover:bg-emerald-300/10"
+        className="mt-6 min-h-11 rounded-2xl border border-lime-300/30 px-4 py-2 font-black text-lime-200 transition hover:bg-lime-300/10"
       >
         Browse exercises
       </button>
@@ -1164,14 +1164,16 @@ function CompletedWorkoutView({
   onStartAnother: () => void;
 }) {
   return (
-    <section className="m-auto w-full max-w-2xl rounded-3xl border border-emerald-300/25 bg-emerald-300/5 p-8 text-center sm:p-12">
-      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-300 text-slate-950">
+    <section className="m-auto w-full max-w-2xl rounded-[2rem] border border-lime-300/25 bg-lime-300/[0.06] p-8 text-center shadow-2xl shadow-black/20 sm:p-12">
+      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-lime-300 text-slate-950 shadow-lg shadow-lime-500/20">
         <CheckIcon />
       </div>
-      <p className="mt-6 text-sm font-bold tracking-widest text-emerald-300 uppercase">
+      <p className="mt-6 text-sm font-black tracking-[0.18em] text-lime-300 uppercase">
         Workout saved
       </p>
-      <h1 className="mt-2 text-3xl font-bold">Session complete</h1>
+      <h1 className="mt-2 text-4xl font-black tracking-tight">
+        Session complete
+      </h1>
       <div className="mt-8 grid grid-cols-3 gap-3">
         <Metric
           label="Duration"
@@ -1183,14 +1185,14 @@ function CompletedWorkoutView({
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
         <Link
           href="/dashboard"
-          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-5 py-2 font-bold text-slate-950"
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-lime-300 px-5 py-2 font-black text-slate-950"
         >
           Return to dashboard
         </Link>
         <button
           type="button"
           onClick={onStartAnother}
-          className="min-h-11 rounded-lg border border-white/15 px-5 py-2 font-semibold"
+          className="min-h-11 rounded-2xl border border-white/15 px-5 py-2 font-bold transition hover:bg-white/10"
         >
           Start another workout
         </button>
@@ -1201,9 +1203,9 @@ function CompletedWorkoutView({
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3 sm:p-4">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-lg shadow-black/10 sm:p-4">
       <p className="truncate text-xs text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-lg font-bold sm:text-xl">{value}</p>
+      <p className="mt-1 truncate text-lg font-black sm:text-xl">{value}</p>
     </div>
   );
 }
