@@ -63,7 +63,9 @@ export function BodyModelCard() {
         <p className="text-sm font-black tracking-[0.18em] text-lime-200 uppercase">
           Approximate visualization
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Interactive body model</h2>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">
+          Interactive body model
+        </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
           Rotate and zoom the model to understand its regions. This is a visual
           aid based on recorded measurements, not a clinical body scan. The
@@ -157,4 +159,3 @@ class BodyModelErrorBoundary extends Component<
     );
   }
 }
-

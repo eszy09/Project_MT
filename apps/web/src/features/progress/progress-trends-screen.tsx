@@ -45,7 +45,7 @@ export function ProgressTrendsScreen({
               <select
                 name="days"
                 defaultValue={selectedDays}
-                className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-3 outline-none transition focus:border-lime-300/70"
+                className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-3 transition outline-none focus:border-lime-300/70"
               >
                 <option value={30}>Last 30 days</option>
                 <option value={90}>Last 90 days</option>
