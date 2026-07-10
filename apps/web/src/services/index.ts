@@ -10,6 +10,7 @@ export { logApiFailure } from "./telemetry";
 export {
   ProgressApiError,
   createBodyCheckin,
+  getLatestBodyCheckin,
   getProgressSourceData,
 } from "./progress-api";
 export {
