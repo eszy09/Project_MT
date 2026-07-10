@@ -43,13 +43,13 @@ describe("OnboardingFlow", () => {
     expect(screen.getByDisplayValue("New athlete")).toBeInTheDocument();
   });
 
-  it("explains why optional body measurements are requested", () => {
+  it("explains the avatar baseline measurement path", () => {
     render(<OnboardingFlow draft={draft} fallbackDisplayName="" step={3} />);
 
     expect(screen.getAllByText("(optional)")).toHaveLength(3);
-    expect(screen.getByText(/why we ask/i)).toBeInTheDocument();
+    expect(screen.getByText(/minimum avatar baseline/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/private, optional, and are not used to diagnose/i),
+      screen.getByText(/add waist during your first check-in/i),
     ).toBeInTheDocument();
   });
 

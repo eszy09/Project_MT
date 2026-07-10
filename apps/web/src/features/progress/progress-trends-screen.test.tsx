@@ -14,6 +14,23 @@ const avatarComparison: AvatarComparison = {
     heightCm: 180,
     weightKg: 79,
     bodyFatPercent: null,
+    readiness: {
+      complete: false,
+      completedCount: 2,
+      totalCount: 3,
+      missingMinimum: [
+        {
+          id: "waist",
+          label: "Waist",
+          unit: "cm",
+          priority: "minimum",
+          avatarUse: "anchors torso taper and body-composition visual signal",
+        },
+      ],
+      availableOptional: [],
+      label: "Minimum data needed",
+      summary: "Add waist to unlock the minimum avatar baseline.",
+    },
     scales: {
       torso: 1,
       waist: 1,
