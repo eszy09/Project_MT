@@ -61,7 +61,6 @@ export function BodyAvatarHero({
               avatar, your check-ins, your workouts, and the context behind
               progress. The dashboard now shows the avatar as the main product
               anchor and uses available measurements to shape its signals.
-              progress. This phase makes the avatar the dashboard anchor.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
@@ -83,7 +82,6 @@ export function BodyAvatarHero({
             targetAreaLabels={targetAreaLabels}
             avatarSignals={avatarSignals}
           />
-          <AvatarSilhouette targetAreaLabels={targetAreaLabels} />
         </div>
       </Surface>
 
@@ -131,24 +129,6 @@ export function BodyAvatarHero({
               target="limb proportion signals"
               ready={avatarSignals.source === "check-in"}
             />
-            Measurement mapping plan
-          </p>
-          <div className="mt-4 space-y-3">
-            <AvatarMeasurementRow
-              label="Height + weight"
-              target="overall scale and mass signal"
-              ready={Boolean(avatarSignals.heightCm || avatarSignals.weightKg)}
-            />
-            <AvatarMeasurementRow
-              label="Waist + hips"
-              target="torso, waist, and hip proportions"
-              ready={avatarSignals.source === "check-in"}
-            />
-            <AvatarMeasurementRow
-              label="Arm + thigh"
-              target="limb proportion signals"
-              ready={avatarSignals.source === "check-in"}
-            />
           </div>
         </Surface>
       </div>
@@ -163,16 +143,6 @@ export function BodyAvatarHero({
 function AvatarSilhouette({
   targetAreaLabels,
   avatarSignals,
-}: {
-  targetAreaLabels: string[];
-  avatarSignals: AvatarSignals;
-}) {
-  const torsoTransform = scaleTransform(130, avatarSignals.scales.torso);
-  const waistTransform = scaleTransform(130, avatarSignals.scales.waist);
-  const hipTransform = scaleTransform(130, avatarSignals.scales.hip);
-  const armTransform = scaleTransform(130, avatarSignals.scales.arm);
-  const thighTransform = scaleTransform(130, avatarSignals.scales.thigh);
-
 }: {
   targetAreaLabels: string[];
   avatarSignals: AvatarSignals;
@@ -263,53 +233,6 @@ function AvatarSilhouette({
             strokeWidth="5"
           />
         </g>
-      </svg>
-      <div className="relative mb-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-        <AvatarScale label="Torso" value={avatarSignals.scales.torso} />
-        <AvatarScale label="Waist" value={avatarSignals.scales.waist} />
-        <AvatarScale label="Hip" value={avatarSignals.scales.hip} />
-        <AvatarScale label="Arm" value={avatarSignals.scales.arm} />
-        <AvatarScale label="Thigh" value={avatarSignals.scales.thigh} />
-        <div className="rounded-2xl border border-lime-300/20 bg-lime-300/10 p-3 font-black text-lime-100 capitalize">
-          {avatarSignals.source.replace("-", " ")}
-        </div>
-      </div>
-        <path
-          d="M96 91 C111 80 149 80 164 91 C180 111 185 146 178 184 C172 217 166 242 170 278 L181 382 C182 397 171 407 158 398 L135 286 C133 276 127 276 125 286 L102 398 C89 407 78 397 79 382 L90 278 C94 242 88 217 82 184 C75 146 80 111 96 91 Z"
-          fill="url(#avatarBody)"
-          opacity="0.92"
-        />
-        <path
-          d="M83 108 C60 133 48 174 43 229 C42 243 52 251 62 241 C66 197 75 164 91 136 Z"
-          fill="#d8b4fe"
-          opacity="0.86"
-        />
-        <path
-          d="M177 108 C200 133 212 174 217 229 C218 243 208 251 198 241 C194 197 185 164 169 136 Z"
-          fill="#d8b4fe"
-          opacity="0.86"
-        />
-        <path
-          d="M100 168 C116 178 144 178 160 168 C158 203 151 226 130 226 C109 226 102 203 100 168 Z"
-          fill="#030712"
-          opacity="0.2"
-        />
-        <path
-          d="M92 139 C111 151 149 151 168 139"
-          fill="none"
-          stroke="#bef264"
-          strokeLinecap="round"
-          strokeOpacity="0.75"
-          strokeWidth="5"
-        />
-        <path
-          d="M98 216 C115 226 145 226 162 216"
-          fill="none"
-          stroke="#a78bfa"
-          strokeLinecap="round"
-          strokeOpacity="0.75"
-          strokeWidth="5"
-        />
       </svg>
       <div className="relative mb-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
         <AvatarScale label="Torso" value={avatarSignals.scales.torso} />

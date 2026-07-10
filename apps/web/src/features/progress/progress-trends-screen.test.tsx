@@ -1,31 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import {
-  ProgressTrendsScreen,
-  TrendChart,
-  type AvatarComparison,
-} from "./progress-trends-screen";
+import { ProgressTrendsScreen, TrendChart } from "./progress-trends-screen";
 import type { ProgressTrends, TrendSeries } from "./progress-trends";
 
-const avatarComparison: AvatarComparison = {
-  current: {
-    source: "profile",
-    measuredAt: "2026-04-30T00:00:00Z",
-    heightCm: 180,
-    weightKg: 79,
-    bodyFatPercent: null,
-    scales: {
-      torso: 1,
-      waist: 1,
-      hip: 1,
-      arm: 1,
-      thigh: 1,
-    },
-    confidenceLabel: "Profile estimate",
-    summary: "Profile height and weight provide a temporary avatar estimate.",
-  },
-  previous: null,
-};
 const populated: TrendSeries = {
   id: "weight",
   title: "Weight",
@@ -82,7 +59,6 @@ describe("ProgressTrendsScreen", () => {
         trends={trends}
         selectedDays={90}
         error={{ message: "Progress unavailable.", requestId: "request-25" }}
-        avatarComparison={avatarComparison}
       />,
     );
 

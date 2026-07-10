@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/features/auth";
-import { buildAvatarSignals } from "@/features/body-model";
 import { ProgressTrendsScreen, buildProgressTrends } from "@/features/progress";
 import {
   ProgressApiError,
@@ -49,15 +48,6 @@ export default async function ProgressPage({
     <ProgressTrendsScreen
       trends={buildProgressTrends(source.checkins, source.workouts, from, to)}
       selectedDays={selectedDays}
-      avatarComparison={{
-        current: buildAvatarSignals({
-          profile,
-          latestCheckin: source.checkins[0] ?? null,
-        }),
-        previous: source.checkins[1]
-          ? buildAvatarSignals({ profile, latestCheckin: source.checkins[1] })
-          : null,
-      }}
       error={error}
     />
   );
