@@ -1,4 +1,8 @@
 import type { BodyCheckin, OnboardingDraft } from "@/services";
+import {
+  evaluateAvatarMeasurementReadiness,
+  type AvatarMeasurementReadiness,
+} from "./measurement-strategy";
 
 export type AvatarSignalSource = "check-in" | "profile" | "empty";
 
@@ -8,6 +12,7 @@ export type AvatarSignals = {
   heightCm: number | null;
   weightKg: number | null;
   bodyFatPercent: number | null;
+  readiness: AvatarMeasurementReadiness;
   scales: {
     torso: number;
     waist: number;
@@ -35,6 +40,10 @@ export function buildAvatarSignals({
   latestCheckin: BodyCheckin | null;
 }): AvatarSignals {
   const derived = latestCheckin?.derivedParameters;
+  const readiness = evaluateAvatarMeasurementReadiness({
+    profile,
+    latestCheckin,
+  });
   const source: AvatarSignalSource = latestCheckin
     ? "check-in"
     : profile.heightCm || profile.weightKg
@@ -63,19 +72,24 @@ export function buildAvatarSignals({
     heightCm,
     weightKg,
     bodyFatPercent,
+    readiness,
     scales,
     confidenceLabel:
       source === "check-in"
-        ? "Measurement-driven"
+        ? readiness.complete
+          ? "Measurement-driven"
+          : "Partial check-in"
         : source === "profile"
           ? "Profile estimate"
           : "Needs measurements",
     summary:
       source === "check-in"
-        ? "Latest check-in is shaping the avatar proportions."
+        ? readiness.complete
+          ? "Minimum avatar measurements are active, with optional fields improving precision."
+          : readiness.summary
         : source === "profile"
-          ? "Profile height and weight provide a temporary avatar estimate."
-          : "Add body context or a check-in to personalize the avatar.",
+          ? "Profile height and weight provide a temporary avatar estimate. Add waist to unlock the minimum avatar baseline."
+          : "Add height, weight, and waist to create the first human avatar baseline.",
   };
 }
 

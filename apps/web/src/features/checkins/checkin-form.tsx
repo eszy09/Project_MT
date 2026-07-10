@@ -35,8 +35,9 @@ export function CheckinForm({
             Log a body check-in
           </h1>
           <p className="mt-5 text-lg leading-8 text-slate-300">
-            Capture the minimum useful signal: weight, measurements, and notes.
-            Keep photos/media separate until the media loop is ready.
+            Capture the avatar minimum set first: weight and waist. Add the rest
+            only when you can measure it consistently. Keep photos/media
+            separate until the media loop is ready.
           </p>
         </div>
 
@@ -62,8 +63,9 @@ export function CheckinForm({
               Record today&apos;s baseline
             </h2>
             <p className="mt-3 max-w-2xl leading-7 text-slate-300">
-              Only date/time is required. Add the fields you can measure
-              reliably; missing fields will not block the check-in.
+              Only date/time is technically required. For the avatar baseline,
+              add waist if this is your first measurement check-in; other fields
+              improve precision later.
             </p>
           </div>
 
@@ -100,6 +102,7 @@ export function CheckinForm({
               unit="kg"
               min={0.001}
               max={500}
+              recommended
             />
             <MeasurementField
               id="bodyFatPercent"
@@ -109,7 +112,13 @@ export function CheckinForm({
               max={75}
             />
             <MeasurementField id="chest" label="Chest" unit="cm" min={0.001} />
-            <MeasurementField id="waist" label="Waist" unit="cm" min={0.001} />
+            <MeasurementField
+              id="waist"
+              label="Waist"
+              unit="cm"
+              min={0.001}
+              recommended
+            />
             <MeasurementField id="hips" label="Hips" unit="cm" min={0.001} />
             <MeasurementField id="arm" label="Arm" unit="cm" min={0.001} />
             <MeasurementField id="thigh" label="Thigh" unit="cm" min={0.001} />
@@ -160,16 +169,18 @@ function MeasurementField({
   unit,
   min,
   max,
+  recommended = false,
 }: {
   id: string;
   label: string;
   unit: string;
   min: number;
   max?: number;
+  recommended?: boolean;
 }) {
   return (
     <label htmlFor={id} className="block font-bold">
-      {label} <Optional />
+      {label} {recommended ? <Recommended /> : <Optional />}
       <div className="mt-3 flex overflow-hidden rounded-2xl border border-white/15 bg-slate-950/80 transition focus-within:border-lime-300/70">
         <input
           id={id}
@@ -194,4 +205,8 @@ function Required() {
 
 function Optional() {
   return <span className="font-normal text-slate-400">(optional)</span>;
+}
+
+function Recommended() {
+  return <span className="font-normal text-lime-300">(avatar minimum)</span>;
 }

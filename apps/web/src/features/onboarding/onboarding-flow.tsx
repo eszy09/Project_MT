@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useActionState } from "react";
@@ -239,7 +239,7 @@ function BodyContextStage({ draft }: { draft: OnboardingDraft | null }) {
       <StageHeading
         eyebrow="Body context"
         title="Add useful context"
-        description="Everything on this stage is optional. Add only what you want the product to use for progress context."
+        description="Add the shortest useful avatar baseline now. Waist and other circumference fields are captured during check-ins so setup stays fast."
       />
       <label htmlFor="experienceLevel" className="mt-7 block font-bold">
         Training experience <Optional />
@@ -275,9 +275,10 @@ function BodyContextStage({ draft }: { draft: OnboardingDraft | null }) {
         />
       </div>
       <aside className="mt-6 rounded-3xl border border-cyan-300/20 bg-cyan-400/10 p-5 text-sm leading-6 text-slate-300">
-        <strong className="text-cyan-200">Why we ask:</strong> body measurements
-        can improve progress context and future exercise guidance. They are
-        private, optional, and are not used to diagnose health conditions.
+        <strong className="text-cyan-200">Minimum avatar baseline:</strong>{" "}
+        height and weight start the model here. Add waist during your first
+        check-in to complete the minimum set; chest, hips, arms, thighs, and
+        body fat remain optional precision fields.
       </aside>
       <FormFooter state={state} pending={pending} label="Save and review" />
     </form>
