@@ -7,7 +7,11 @@ export {
   saveProfileStage,
 } from "./onboarding-api";
 export { logApiFailure } from "./telemetry";
-export { ProgressApiError, getProgressSourceData } from "./progress-api";
+export {
+  ProgressApiError,
+  createBodyCheckin,
+  getProgressSourceData,
+} from "./progress-api";
 export {
   WorkoutApiError,
   getPreviousPerformance,
@@ -16,7 +20,7 @@ export {
   saveCompletedWorkout,
 } from "./workout-api";
 
-export type { BodyCheckin } from "./progress-api";
+export type { BodyCheckin, BodyCheckinInput } from "./progress-api";
 export type {
   ExperienceLevel,
   OnboardingDraft,

@@ -9,6 +9,7 @@ import {
 } from "./workout-api";
 
 export type BodyCheckin = components["schemas"]["BodyCheckinResponse"];
+export type BodyCheckinInput = components["schemas"]["BodyCheckinRequest"];
 
 export class ProgressApiError extends Error {
   constructor(
@@ -21,6 +22,49 @@ export class ProgressApiError extends Error {
   }
 }
 
+export async function createBodyCheckin(
+  input: BodyCheckinInput,
+): Promise<BodyCheckin> {
+  const { token } = await auth0.getAccessToken();
+  const requestId = crypto.randomUUID();
+  let response: Response;
+
+  try {
+    response = await fetch(
+      `${process.env.API_BASE_URL ?? "http://localhost:8080"}/api/v1/checkins`,
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "X-Request-ID": requestId,
+        },
+        body: JSON.stringify(input),
+      },
+    );
+  } catch {
+    throw new ProgressApiError(
+      "Progress check-ins could not be reached.",
+      503,
+      requestId,
+    );
+  }
+
+  const correlatedRequestId = response.headers.get("X-Request-ID") ?? requestId;
+  if (!response.ok) {
+    const problem = (await response.json().catch(() => null)) as {
+      detail?: string;
+    } | null;
+    throw new ProgressApiError(
+      problem?.detail ?? "Progress check-in could not be saved.",
+      response.status,
+      correlatedRequestId,
+    );
+  }
+
+  return (await response.json()) as BodyCheckin;
+}
 export async function getProgressSourceData(
   from: string,
   to: string,

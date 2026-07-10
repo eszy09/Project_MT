@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge, PageHeader, StatCard, Surface, cn } from "@/components";
 import { requireSession } from "@/features/auth";
@@ -247,21 +247,21 @@ function CheckInsPanel() {
         eyebrow="Progress input"
         title="Record a progress check-in"
         description="Use check-ins to add measurements, visual context, and consistency signals over time."
-        href="/progress"
-        action="Open progress"
+        href="/check-ins/new"
+        action="Log check-in"
         tone="violet"
       />
       <Surface className="p-7">
         <p className="text-sm font-bold tracking-[0.18em] text-slate-400 uppercase">
-          Next build target
+          Measurement loop
         </p>
         <h2 className="mt-3 text-3xl font-black tracking-tight">
-          Dedicated check-in creation flow
+          Check-ins are ready to log
         </h2>
         <p className="mt-3 leading-7 text-slate-300">
-          This tab is ready for a proper check-in form: body weight,
-          circumference, photos/media, and notes. For now, progress trends are
-          the entry point.
+          Use the dedicated check-in flow for body weight, circumference,
+          body-fat estimates, and private context notes. Media belongs in the
+          next consent-first journal/media loop.
         </p>
       </Surface>
     </div>
@@ -328,7 +328,7 @@ function ActionGrid() {
     },
     {
       label: "Log check-in",
-      href: "/dashboard?tab=check-ins",
+      href: "/check-ins/new",
       detail: "Record body context and visual progress.",
       tone: "violet",
     },
