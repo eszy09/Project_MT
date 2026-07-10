@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Badge, Surface } from "@/components";
 import { BodyModelCard, type AvatarSignals } from "@/features/body-model";
 import type { ProgressTrends, TrendSeries } from "./progress-trends";
@@ -23,21 +23,14 @@ export function ProgressTrendsScreen({
 
   return (
     <section className="w-full">
-      <Link
-        href="/dashboard"
-        className="text-sm font-bold text-slate-400 transition hover:text-white"
-      >
-        ← Dashboard
-      </Link>
-      <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+      <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
         <div>
-          <Badge>Progress command view</Badge>
-          <h1 className="mt-5 text-5xl font-black tracking-[-0.05em] sm:text-6xl">
-            Understand your trends
+          <Badge>Progress</Badge>
+          <h1 className="mt-4 text-4xl font-black tracking-[-0.05em] sm:text-6xl">
+            Trends and avatar signals
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
-            These summaries describe recorded changes and training consistency.
-            They do not diagnose health conditions or claim medical causation.
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            These trends do not diagnose health conditions.
           </p>
         </div>
         <Surface className="p-4">
@@ -49,9 +42,9 @@ export function ProgressTrendsScreen({
                 defaultValue={selectedDays}
                 className="min-h-12 rounded-2xl border border-white/10 bg-slate-950/80 px-3 transition outline-none focus:border-lime-300/70"
               >
-                <option value={30}>Last 30 days</option>
-                <option value={90}>Last 90 days</option>
-                <option value={180}>Last 180 days</option>
+                <option value={30}>30 days</option>
+                <option value={90}>90 days</option>
+                <option value={180}>180 days</option>
               </select>
             </label>
             <button
@@ -67,7 +60,7 @@ export function ProgressTrendsScreen({
       {error && (
         <div
           role="alert"
-          className="mt-6 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-amber-100"
+          className="mt-5 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-amber-100"
         >
           <p className="font-bold">Progress needs attention</p>
           <p className="mt-1">{error.message}</p>
@@ -81,12 +74,13 @@ export function ProgressTrendsScreen({
 
       <AvatarProgressComparison comparison={avatarComparison} />
 
-      <BodyModelCard />
-
-      <div className="mt-8 grid gap-5 lg:grid-cols-2">
-        {series.map((trend) => (
-          <TrendChart key={trend.id} trend={trend} />
-        ))}
+      <div className="mt-5 grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+        <BodyModelCard />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {series.map((trend) => (
+            <TrendChart key={trend.id} trend={trend} />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -98,13 +92,13 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
   const coordinates = chartCoordinates(trend.points);
 
   return (
-    <article className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/20">
+    <article className="rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-4 shadow-xl shadow-black/20">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 id={titleId} className="text-2xl font-black tracking-tight">
+          <h2 id={titleId} className="text-xl font-black tracking-tight">
             {trend.title}
           </h2>
-          <p className="mt-1 text-sm text-slate-400">{trend.dateRange}</p>
+          <p className="mt-1 text-sm text-slate-500">{trend.dateRange}</p>
         </div>
         <span className="rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-1 text-xs font-black text-violet-100">
           {trend.unit}
@@ -112,13 +106,13 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
       </div>
 
       {trend.limitedMessage ? (
-        <div className="mt-5 flex min-h-48 items-center justify-center rounded-3xl border border-dashed border-white/15 bg-slate-950/35 p-6 text-center text-slate-400">
+        <div className="mt-4 flex min-h-40 items-center justify-center rounded-3xl border border-dashed border-white/15 bg-slate-950/35 p-5 text-center text-slate-400">
           <p>{trend.limitedMessage}</p>
         </div>
       ) : (
         <svg
           viewBox="0 0 600 220"
-          className="mt-5 h-52 w-full overflow-visible"
+          className="mt-4 h-44 w-full overflow-visible"
           role="img"
           aria-labelledby={`${titleId} ${summaryId}`}
         >
@@ -161,7 +155,7 @@ export function TrendChart({ trend }: { trend: TrendSeries }) {
 
       <p
         id={summaryId}
-        className="mt-4 border-t border-white/10 pt-4 text-sm leading-6 text-slate-300"
+        className="mt-3 border-t border-white/10 pt-3 text-sm leading-6 text-slate-300"
       >
         <span className="font-black text-white">Text summary: </span>
         {trend.summary}
@@ -217,73 +211,33 @@ function AvatarProgressComparison({
   ] as const;
 
   return (
-    <Surface className="mt-8 overflow-hidden p-6 sm:p-8">
-      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+    <Surface className="mt-6 p-5 sm:p-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <Badge>Avatar comparison</Badge>
-          <h2 className="mt-4 text-4xl font-black tracking-[-0.04em]">
-            Current shape signals vs previous check-in
+          <h2 className="mt-3 text-3xl font-black tracking-[-0.04em]">
+            Current vs previous
           </h2>
-          <p className="mt-4 leading-7 text-slate-300">
-            This compares derived avatar scale signals, not exact body shape.
-            Use it as a visual context layer beside measurements and journal
-            notes.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <AvatarStateCard label="Current" signal={comparison.current} />
-            <AvatarStateCard label="Previous" signal={comparison.previous} />
-          </div>
         </div>
+        <Link
+          href="/check-ins/new"
+          className="rounded-2xl bg-lime-300 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-lime-200"
+        >
+          New check-in
+        </Link>
+      </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-4">
-          <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-b border-white/10 pb-3 text-xs font-black tracking-[0.18em] text-slate-500 uppercase">
-            <span>Signal</span>
-            <span>Current</span>
-            <span>Delta</span>
-          </div>
-          <div className="mt-3 space-y-2">
-            {rows.map(([label, current, previous]) => (
-              <AvatarDeltaRow
-                key={label}
-                label={label}
-                current={current}
-                previous={previous ?? null}
-              />
-            ))}
-          </div>
-        </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-5">
+        {rows.map(([label, current, previous]) => (
+          <AvatarDeltaRow
+            key={label}
+            label={label}
+            current={current}
+            previous={previous ?? null}
+          />
+        ))}
       </div>
     </Surface>
-  );
-}
-
-function AvatarStateCard({
-  label,
-  signal,
-}: {
-  label: string;
-  signal: AvatarSignals | null;
-}) {
-  return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
-      <p className="text-xs font-black tracking-[0.18em] text-slate-500 uppercase">
-        {label}
-      </p>
-      {signal ? (
-        <>
-          <p className="mt-3 text-xl font-black tracking-tight">
-            {signal.confidenceLabel}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-slate-400">
-            {signal.measuredAt ? formatDate(signal.measuredAt) : "No date"}
-          </p>
-        </>
-      ) : (
-        <p className="mt-3 text-sm leading-6 text-slate-400">
-          Add another check-in to compare avatar changes.
-        </p>
-      )}
-    </div>
   );
 }
 
@@ -299,20 +253,12 @@ function AvatarDeltaRow({
   const delta = previous === null ? null : current - previous;
 
   return (
-    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-sm">
-      <span className="font-black">{label}</span>
-      <span className="font-mono text-slate-300">{current.toFixed(2)}x</span>
-      <span className="font-mono text-lime-200">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-sm">
+      <p className="font-black">{label}</p>
+      <p className="mt-2 font-mono text-slate-300">{current.toFixed(2)}x</p>
+      <p className="mt-1 font-mono text-lime-200">
         {delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(2)}`}
-      </span>
+      </p>
     </div>
   );
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
 }

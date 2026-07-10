@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+﻿import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import HomePage from "./page";
 
@@ -8,10 +8,10 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /train with context/i,
+        name: /human-first training dashboard/i,
       }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText(/reliable workout logging/i)).toBeInTheDocument();
+    expect(screen.getByText(/set-by-set logging/i)).toBeInTheDocument();
   });
 });
