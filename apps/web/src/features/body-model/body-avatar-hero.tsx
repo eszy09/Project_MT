@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge, Surface, cn } from "@/components";
+import type { AvatarSignals } from "./avatar-signals";
 import { BodyModelCard } from "./body-model-card";
 
 type AvatarReadiness = {
@@ -9,34 +10,18 @@ type AvatarReadiness = {
   tone: "lime" | "violet" | "cyan";
 };
 
-const parameterPlan = [
-  {
-    label: "Height + weight",
-    target: "overall scale and mass signal",
-    ready: true,
-  },
-  {
-    label: "Waist + hips",
-    target: "torso, waist, and hip proportions",
-    ready: false,
-  },
-  {
-    label: "Arm + thigh",
-    target: "limb proportion signals",
-    ready: false,
-  },
-] as const;
-
 export function BodyAvatarHero({
   displayName,
   primaryGoal,
   targetAreaSummary,
   targetAreaLabels,
+  avatarSignals,
 }: {
   displayName: string;
   primaryGoal: string;
   targetAreaSummary: string;
   targetAreaLabels: string[];
+  avatarSignals: AvatarSignals;
 }) {
   const readiness: AvatarReadiness[] = [
     {
@@ -53,8 +38,8 @@ export function BodyAvatarHero({
     },
     {
       label: "Avatar data",
-      value: "Check-in next",
-      detail: "Measurements will drive proportion changes in the next phase.",
+      value: avatarSignals.confidenceLabel,
+      detail: avatarSignals.summary,
       tone: "cyan",
     },
   ];
@@ -149,27 +134,21 @@ export function BodyAvatarHero({
             Measurement mapping plan
           </p>
           <div className="mt-4 space-y-3">
-            {parameterPlan.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-black">{item.label}</p>
-                  <span
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-xs font-black",
-                      item.ready
-                        ? "border-lime-300/25 bg-lime-300/10 text-lime-200"
-                        : "border-violet-300/25 bg-violet-400/10 text-violet-100",
-                    )}
-                  >
-                    {item.ready ? "Ready" : "Phase 2"}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-slate-400">{item.target}</p>
-              </div>
-            ))}
+            <AvatarMeasurementRow
+              label="Height + weight"
+              target="overall scale and mass signal"
+              ready={Boolean(avatarSignals.heightCm || avatarSignals.weightKg)}
+            />
+            <AvatarMeasurementRow
+              label="Waist + hips"
+              target="torso, waist, and hip proportions"
+              ready={avatarSignals.source === "check-in"}
+            />
+            <AvatarMeasurementRow
+              label="Arm + thigh"
+              target="limb proportion signals"
+              ready={avatarSignals.source === "check-in"}
+            />
           </div>
         </Surface>
       </div>
@@ -196,7 +175,14 @@ function AvatarSilhouette({
 
 }: {
   targetAreaLabels: string[];
+  avatarSignals: AvatarSignals;
 }) {
+  const torsoTransform = scaleTransform(130, avatarSignals.scales.torso);
+  const waistTransform = scaleTransform(130, avatarSignals.scales.waist);
+  const hipTransform = scaleTransform(130, avatarSignals.scales.hip);
+  const armTransform = scaleTransform(130, avatarSignals.scales.arm);
+  const thighTransform = scaleTransform(130, avatarSignals.scales.thigh);
+
   return (
     <div className="relative mx-auto w-full max-w-sm rounded-[2.5rem] border border-white/10 bg-slate-950/45 p-5 shadow-2xl shadow-black/30">
       <div className="absolute inset-x-8 top-8 h-32 rounded-full bg-lime-300/10 blur-3xl" />
@@ -325,6 +311,16 @@ function AvatarSilhouette({
           strokeWidth="5"
         />
       </svg>
+      <div className="relative mb-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+        <AvatarScale label="Torso" value={avatarSignals.scales.torso} />
+        <AvatarScale label="Waist" value={avatarSignals.scales.waist} />
+        <AvatarScale label="Hip" value={avatarSignals.scales.hip} />
+        <AvatarScale label="Arm" value={avatarSignals.scales.arm} />
+        <AvatarScale label="Thigh" value={avatarSignals.scales.thigh} />
+        <div className="rounded-2xl border border-lime-300/20 bg-lime-300/10 p-3 font-black text-lime-100 capitalize">
+          {avatarSignals.source.replace("-", " ")}
+        </div>
+      </div>
       <div className="relative rounded-3xl border border-white/10 bg-white/[0.045] p-4">
         <p className="text-xs font-black tracking-[0.18em] text-lime-200 uppercase">
           Focus areas
