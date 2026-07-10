@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import dynamic from "next/dynamic";
 import {
@@ -61,16 +61,16 @@ export function BodyModelCard() {
     >
       <div>
         <p className="text-sm font-black tracking-[0.18em] text-lime-200 uppercase">
-          Approximate visualization
+          Human avatar view
         </p>
         <h2 className="mt-2 text-3xl font-black tracking-tight">
-          Interactive body model
+          Interactive human progress avatar
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-          Rotate and zoom the model to understand its regions. This is a visual
-          aid based on recorded measurements, not a clinical body scan. The
-          buttons below provide the same muscle-area selection without needing
-          the canvas.
+          Rotate and zoom the avatar to understand body regions. This is a
+          human-centered progress aid based on recorded measurements, not a
+          clinical body scan. The buttons below provide the same region
+          selection without needing the canvas.
         </p>
       </div>
 

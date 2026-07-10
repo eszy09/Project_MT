@@ -40,7 +40,7 @@ describe("body model capability and states", () => {
 
     expect(
       screen.getByRole("img", {
-        name: /static front view of the approximate body model/i,
+        name: /static human silhouette for the approximate progress avatar/i,
       }),
     ).toBeVisible();
     expect(screen.getByText(/webgl is unavailable/i)).toBeVisible();

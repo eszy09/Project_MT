@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge, PageHeader, StatCard, Surface, cn } from "@/components";
 import { requireSession } from "@/features/auth";
+import { BodyAvatarHero } from "@/features/body-model";
 import { primaryGoalLabel, targetAreaLabel } from "@/features/onboarding";
 import { getOnboardingDraft } from "@/services";
 
@@ -63,9 +64,9 @@ export default async function DashboardPage({
   return (
     <section className="w-full">
       <PageHeader
-        eyebrow="Command center"
+        eyebrow="Avatar-first dashboard"
         title={`Welcome, ${profile.displayName}`}
-        description={`Your starting point is saved. Project_MT can now shape training around ${primaryGoal.toLowerCase()} with priority on ${targetAreaSummary}.`}
+        description={`Your starting point is saved. The avatar now becomes the visual anchor for ${primaryGoal.toLowerCase()}, check-ins, workouts, and progress context.`}
       >
         <Surface className="min-w-72 p-5" tone="active">
           <p className="text-sm font-bold text-lime-100">Readiness</p>
@@ -78,6 +79,12 @@ export default async function DashboardPage({
         </Surface>
       </PageHeader>
 
+      <BodyAvatarHero
+        displayName={profile.displayName}
+        primaryGoal={primaryGoal}
+        targetAreaSummary={targetAreaSummary}
+        targetAreaLabels={targetAreas}
+      />
       <nav
         aria-label="Dashboard sections"
         className="mt-10 flex gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-white/[0.035] p-2"
