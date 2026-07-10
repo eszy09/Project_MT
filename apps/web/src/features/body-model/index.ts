@@ -1,4 +1,3 @@
-export * from "./avatar-signals";
 export * from "./body-avatar-hero";
 export * from "./body-model-capability";
 export * from "./body-model-card";

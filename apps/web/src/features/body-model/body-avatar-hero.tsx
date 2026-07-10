@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Badge, Surface, cn } from "@/components";
-import type { AvatarSignals } from "./avatar-signals";
 import { BodyModelCard } from "./body-model-card";
 
 type AvatarReadiness = {
@@ -10,18 +9,34 @@ type AvatarReadiness = {
   tone: "lime" | "violet" | "cyan";
 };
 
+const parameterPlan = [
+  {
+    label: "Height + weight",
+    target: "overall scale and mass signal",
+    ready: true,
+  },
+  {
+    label: "Waist + hips",
+    target: "torso, waist, and hip proportions",
+    ready: false,
+  },
+  {
+    label: "Arm + thigh",
+    target: "limb proportion signals",
+    ready: false,
+  },
+] as const;
+
 export function BodyAvatarHero({
   displayName,
   primaryGoal,
   targetAreaSummary,
   targetAreaLabels,
-  avatarSignals,
 }: {
   displayName: string;
   primaryGoal: string;
   targetAreaSummary: string;
   targetAreaLabels: string[];
-  avatarSignals: AvatarSignals;
 }) {
   const readiness: AvatarReadiness[] = [
     {
@@ -38,8 +53,8 @@ export function BodyAvatarHero({
     },
     {
       label: "Avatar data",
-      value: avatarSignals.confidenceLabel,
-      detail: avatarSignals.summary,
+      value: "Check-in next",
+      detail: "Measurements will drive proportion changes in the next phase.",
       tone: "cyan",
     },
   ];
@@ -59,8 +74,7 @@ export function BodyAvatarHero({
             <p className="mt-5 text-lg leading-8 text-slate-300">
               Project_MT should feel built around a human training journey: the
               avatar, your check-ins, your workouts, and the context behind
-              progress. The dashboard now shows the avatar as the main product
-              anchor and uses available measurements to shape its signals.
+              progress. This phase makes the avatar the dashboard anchor.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
@@ -78,10 +92,7 @@ export function BodyAvatarHero({
             </div>
           </div>
 
-          <AvatarSilhouette
-            targetAreaLabels={targetAreaLabels}
-            avatarSignals={avatarSignals}
-          />
+          <AvatarSilhouette targetAreaLabels={targetAreaLabels} />
         </div>
       </Surface>
 
@@ -111,24 +122,30 @@ export function BodyAvatarHero({
 
         <Surface className="p-5">
           <p className="text-xs font-black tracking-[0.18em] text-slate-400 uppercase">
-            Measurement mapping
+            Measurement mapping plan
           </p>
           <div className="mt-4 space-y-3">
-            <AvatarMeasurementRow
-              label="Height + weight"
-              target="overall scale and mass signal"
-              ready={Boolean(avatarSignals.heightCm || avatarSignals.weightKg)}
-            />
-            <AvatarMeasurementRow
-              label="Waist + hips"
-              target="torso, waist, and hip proportions"
-              ready={avatarSignals.source === "check-in"}
-            />
-            <AvatarMeasurementRow
-              label="Arm + thigh"
-              target="limb proportion signals"
-              ready={avatarSignals.source === "check-in"}
-            />
+            {parameterPlan.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-black">{item.label}</p>
+                  <span
+                    className={cn(
+                      "rounded-full border px-3 py-1 text-xs font-black",
+                      item.ready
+                        ? "border-lime-300/25 bg-lime-300/10 text-lime-200"
+                        : "border-violet-300/25 bg-violet-400/10 text-violet-100",
+                    )}
+                  >
+                    {item.ready ? "Ready" : "Phase 2"}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-slate-400">{item.target}</p>
+              </div>
+            ))}
           </div>
         </Surface>
       </div>
@@ -142,17 +159,9 @@ export function BodyAvatarHero({
 
 function AvatarSilhouette({
   targetAreaLabels,
-  avatarSignals,
 }: {
   targetAreaLabels: string[];
-  avatarSignals: AvatarSignals;
 }) {
-  const torsoTransform = scaleTransform(130, avatarSignals.scales.torso);
-  const waistTransform = scaleTransform(130, avatarSignals.scales.waist);
-  const hipTransform = scaleTransform(130, avatarSignals.scales.hip);
-  const armTransform = scaleTransform(130, avatarSignals.scales.arm);
-  const thighTransform = scaleTransform(130, avatarSignals.scales.thigh);
-
   return (
     <div className="relative mx-auto w-full max-w-sm rounded-[2.5rem] border border-white/10 bg-slate-950/45 p-5 shadow-2xl shadow-black/30">
       <div className="absolute inset-x-8 top-8 h-32 rounded-full bg-lime-300/10 blur-3xl" />
@@ -175,75 +184,43 @@ function AvatarSilhouette({
         </defs>
         <ellipse cx="130" cy="214" rx="112" ry="178" fill="url(#avatarGlow)" />
         <circle cx="130" cy="56" r="31" fill="#f8fafc" opacity="0.94" />
-        <g transform={torsoTransform}>
-          <path
-            d="M96 91 C111 80 149 80 164 91 C180 111 185 146 178 184 C172 217 166 242 170 278 L181 382 C182 397 171 407 158 398 L135 286 C133 276 127 276 125 286 L102 398 C89 407 78 397 79 382 L90 278 C94 242 88 217 82 184 C75 146 80 111 96 91 Z"
-            fill="url(#avatarBody)"
-            opacity="0.92"
-          />
-        </g>
-        <g transform={armTransform}>
-          <path
-            d="M83 108 C60 133 48 174 43 229 C42 243 52 251 62 241 C66 197 75 164 91 136 Z"
-            fill="#d8b4fe"
-            opacity="0.86"
-          />
-          <path
-            d="M177 108 C200 133 212 174 217 229 C218 243 208 251 198 241 C194 197 185 164 169 136 Z"
-            fill="#d8b4fe"
-            opacity="0.86"
-          />
-        </g>
-        <g transform={waistTransform}>
-          <path
-            d="M100 168 C116 178 144 178 160 168 C158 203 151 226 130 226 C109 226 102 203 100 168 Z"
-            fill="#030712"
-            opacity="0.2"
-          />
-          <path
-            d="M92 139 C111 151 149 151 168 139"
-            fill="none"
-            stroke="#bef264"
-            strokeLinecap="round"
-            strokeOpacity="0.75"
-            strokeWidth="5"
-          />
-        </g>
-        <g transform={hipTransform}>
-          <path
-            d="M98 216 C115 226 145 226 162 216"
-            fill="none"
-            stroke="#a78bfa"
-            strokeLinecap="round"
-            strokeOpacity="0.75"
-            strokeWidth="5"
-          />
-        </g>
-        <g transform={thighTransform} opacity="0.2">
-          <path
-            d="M101 264 C113 274 121 274 128 264"
-            stroke="#bef264"
-            strokeLinecap="round"
-            strokeWidth="5"
-          />
-          <path
-            d="M132 264 C139 274 147 274 159 264"
-            stroke="#bef264"
-            strokeLinecap="round"
-            strokeWidth="5"
-          />
-        </g>
+        <path
+          d="M96 91 C111 80 149 80 164 91 C180 111 185 146 178 184 C172 217 166 242 170 278 L181 382 C182 397 171 407 158 398 L135 286 C133 276 127 276 125 286 L102 398 C89 407 78 397 79 382 L90 278 C94 242 88 217 82 184 C75 146 80 111 96 91 Z"
+          fill="url(#avatarBody)"
+          opacity="0.92"
+        />
+        <path
+          d="M83 108 C60 133 48 174 43 229 C42 243 52 251 62 241 C66 197 75 164 91 136 Z"
+          fill="#d8b4fe"
+          opacity="0.86"
+        />
+        <path
+          d="M177 108 C200 133 212 174 217 229 C218 243 208 251 198 241 C194 197 185 164 169 136 Z"
+          fill="#d8b4fe"
+          opacity="0.86"
+        />
+        <path
+          d="M100 168 C116 178 144 178 160 168 C158 203 151 226 130 226 C109 226 102 203 100 168 Z"
+          fill="#030712"
+          opacity="0.2"
+        />
+        <path
+          d="M92 139 C111 151 149 151 168 139"
+          fill="none"
+          stroke="#bef264"
+          strokeLinecap="round"
+          strokeOpacity="0.75"
+          strokeWidth="5"
+        />
+        <path
+          d="M98 216 C115 226 145 226 162 216"
+          fill="none"
+          stroke="#a78bfa"
+          strokeLinecap="round"
+          strokeOpacity="0.75"
+          strokeWidth="5"
+        />
       </svg>
-      <div className="relative mb-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-        <AvatarScale label="Torso" value={avatarSignals.scales.torso} />
-        <AvatarScale label="Waist" value={avatarSignals.scales.waist} />
-        <AvatarScale label="Hip" value={avatarSignals.scales.hip} />
-        <AvatarScale label="Arm" value={avatarSignals.scales.arm} />
-        <AvatarScale label="Thigh" value={avatarSignals.scales.thigh} />
-        <div className="rounded-2xl border border-lime-300/20 bg-lime-300/10 p-3 font-black text-lime-100 capitalize">
-          {avatarSignals.source.replace("-", " ")}
-        </div>
-      </div>
       <div className="relative rounded-3xl border border-white/10 bg-white/[0.045] p-4">
         <p className="text-xs font-black tracking-[0.18em] text-lime-200 uppercase">
           Focus areas
@@ -261,48 +238,4 @@ function AvatarSilhouette({
       </div>
     </div>
   );
-}
-
-function AvatarMeasurementRow({
-  label,
-  target,
-  ready,
-}: {
-  label: string;
-  target: string;
-  ready: boolean;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="font-black">{label}</p>
-        <span
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-black",
-            ready
-              ? "border-lime-300/25 bg-lime-300/10 text-lime-200"
-              : "border-violet-300/25 bg-violet-400/10 text-violet-100",
-          )}
-        >
-          {ready ? "Active" : "Needs data"}
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-slate-400">{target}</p>
-    </div>
-  );
-}
-
-function AvatarScale({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/55 p-3">
-      <p className="font-black text-slate-200">{label}</p>
-      <p className="mt-1 font-mono text-[0.7rem] text-slate-400">
-        {value.toFixed(2)}x
-      </p>
-    </div>
-  );
-}
-
-function scaleTransform(centerX: number, scale: number) {
-  return `translate(${centerX - centerX * scale} 0) scale(${scale} 1)`;
 }
