@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Badge, Surface, cn } from "@/components";
 import type { AvatarSignals } from "./avatar-signals";
 import { BodyModelCard } from "./body-model-card";
@@ -10,14 +10,12 @@ import {
 type AvatarReadiness = {
   label: string;
   value: string;
-  detail: string;
   tone: "lime" | "violet" | "cyan";
 };
 
 export function BodyAvatarHero({
   displayName,
   primaryGoal,
-  targetAreaSummary,
   targetAreaLabels,
   avatarSignals,
 }: {
@@ -29,73 +27,49 @@ export function BodyAvatarHero({
 }) {
   const readiness: AvatarReadiness[] = [
     {
-      label: "Avatar baseline",
-      value: avatarSignals.readiness.label,
-      detail: avatarSignals.readiness.summary,
+      label: "Baseline",
+      value: `${avatarSignals.readiness.completedCount}/${avatarSignals.readiness.totalCount}`,
       tone: avatarSignals.readiness.complete ? "lime" : "violet",
     },
-    {
-      label: "Training intent",
-      value: primaryGoal,
-      detail: `The model highlights context for ${targetAreaSummary}.`,
-      tone: "cyan",
-    },
-    {
-      label: "Current source",
-      value: avatarSignals.confidenceLabel,
-      detail: avatarSignals.summary,
-      tone: "lime",
-    },
+    { label: "Goal", value: primaryGoal, tone: "cyan" },
+    { label: "Signal", value: avatarSignals.confidenceLabel, tone: "lime" },
   ];
 
   return (
-    <section className="mt-10 space-y-6">
+    <section className="mt-7 space-y-5">
       <Surface tone="active" className="relative overflow-hidden p-0">
-        <div className="absolute -top-36 left-8 size-96 rounded-full bg-lime-300/15 blur-3xl" />
-        <div className="absolute right-0 bottom-0 size-[34rem] rounded-full bg-violet-600/20 blur-3xl" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-300/60 to-transparent" />
+        <div className="absolute -top-40 left-6 size-96 rounded-full bg-lime-300/15 blur-3xl" />
+        <div className="absolute right-0 bottom-0 size-[32rem] rounded-full bg-violet-600/20 blur-3xl" />
 
-        <div className="relative grid gap-0 xl:grid-cols-[1.02fr_0.98fr]">
-          <div className="p-6 sm:p-8 lg:p-10">
-            <Badge>Avatar command center</Badge>
-            <h2 className="mt-5 max-w-4xl text-5xl font-black tracking-[-0.06em] text-balance sm:text-7xl">
-              {displayName}&apos;s human model is now the main interface.
-            </h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              This is the first real avatar layer: it starts from a small set of
-              body measurements, reflects check-in signals, and keeps workout,
-              progress, and body context connected around one human model.
-            </p>
+        <div className="relative grid min-h-[34rem] xl:grid-cols-[0.95fr_1.05fr]">
+          <div className="flex flex-col justify-between p-6 sm:p-8 lg:p-10">
+            <div>
+              <Badge>Avatar hub</Badge>
+              <h2 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.06em] text-balance sm:text-6xl">
+                {displayName}&apos;s body model
+              </h2>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {readiness.map((item) => (
-                <SignalCard key={item.label} item={item} />
-              ))}
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {readiness.map((item) => (
+                  <SignalCard key={item.label} item={item} />
+                ))}
+              </div>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/check-ins/new"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-lime-300 px-6 py-3 text-sm font-black text-slate-950 shadow-lg shadow-lime-500/20 transition hover:bg-lime-200"
-              >
-                Complete avatar baseline
-              </Link>
-              <Link
-                href="/progress"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-violet-300/30 bg-violet-400/10 px-6 py-3 text-sm font-bold text-violet-100 transition hover:bg-violet-400/15"
-              >
-                Compare progress
-              </Link>
-              <Link
-                href="/workouts/active"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.04] px-6 py-3 text-sm font-bold text-slate-100 transition hover:bg-white/10"
-              >
+              <Action href="/check-ins/new" variant="primary">
+                Add measurements
+              </Action>
+              <Action href="/workouts/active" variant="secondary">
                 Train today
-              </Link>
+              </Action>
+              <Action href="/progress" variant="ghost">
+                View progress
+              </Action>
             </div>
           </div>
 
-          <div className="border-t border-white/10 bg-slate-950/35 p-5 xl:border-t-0 xl:border-l">
+          <div className="border-t border-white/10 bg-slate-950/35 p-4 xl:border-t-0 xl:border-l">
             <AvatarStudio
               targetAreaLabels={targetAreaLabels}
               avatarSignals={avatarSignals}
@@ -104,7 +78,7 @@ export function BodyAvatarHero({
         </div>
       </Surface>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid gap-5 xl:grid-cols-[0.88fr_1.12fr]">
         <MeasurementStrategyPanel avatarSignals={avatarSignals} />
         <BodyModelCard />
       </div>
@@ -125,11 +99,37 @@ function SignalCard({ item }: { item: AvatarReadiness }) {
       >
         {item.label}
       </p>
-      <p className="mt-3 text-xl font-black tracking-tight text-white">
+      <p className="mt-2 text-2xl font-black tracking-tight text-white">
         {item.value}
       </p>
-      <p className="mt-2 text-sm leading-6 text-slate-400">{item.detail}</p>
     </div>
+  );
+}
+
+function Action({
+  href,
+  children,
+  variant,
+}: {
+  href: string;
+  children: React.ReactNode;
+  variant: "primary" | "secondary" | "ghost";
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "inline-flex min-h-12 items-center justify-center rounded-2xl px-6 py-3 text-sm font-black transition",
+        variant === "primary" &&
+          "bg-lime-300 text-slate-950 shadow-lg shadow-lime-500/20 hover:bg-lime-200",
+        variant === "secondary" &&
+          "border border-violet-300/30 bg-violet-400/10 text-violet-100 hover:bg-violet-400/15",
+        variant === "ghost" &&
+          "border border-white/15 bg-white/[0.04] text-slate-100 hover:bg-white/10",
+      )}
+    >
+      {children}
+    </Link>
   );
 }
 
@@ -151,16 +151,16 @@ function AvatarStudio({
       <div className="absolute inset-x-10 top-12 h-72 rounded-full bg-lime-300/10 blur-3xl" />
       <div className="absolute inset-x-8 bottom-16 h-72 rounded-full bg-violet-500/15 blur-3xl" />
 
-      <div className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[radial-gradient(circle_at_50%_12%,rgba(190,242,100,0.16),rgba(15,23,42,0.42)_38%,rgba(2,6,23,0.75)_100%)] p-5">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_50%_12%,rgba(190,242,100,0.16),rgba(15,23,42,0.42)_38%,rgba(2,6,23,0.75)_100%)] p-4">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-black tracking-[0.18em] text-lime-200 uppercase">
-              Live body model
+              Live model
             </p>
             <p className="mt-1 text-sm text-slate-400">
               {avatarSignals.measuredAt
-                ? `Last signal: ${formatDate(avatarSignals.measuredAt)}`
-                : "No dated signal yet"}
+                ? formatDate(avatarSignals.measuredAt)
+                : "No check-in yet"}
             </p>
           </div>
           <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-black text-slate-200 capitalize">
@@ -170,7 +170,7 @@ function AvatarStudio({
 
         <svg
           viewBox="0 0 260 430"
-          className="relative mx-auto mt-3 h-[34rem] max-h-[72vh] w-full drop-shadow-2xl"
+          className="relative mx-auto mt-1 h-[31rem] max-h-[68vh] w-full drop-shadow-2xl"
           role="img"
           aria-label="Human avatar driven by profile and check-in measurements"
         >
@@ -289,33 +289,24 @@ function AvatarStudio({
           </g>
         </svg>
 
-        <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+        <div className="grid grid-cols-5 gap-2 text-xs">
           <AvatarScale label="Torso" value={avatarSignals.scales.torso} />
           <AvatarScale label="Waist" value={avatarSignals.scales.waist} />
           <AvatarScale label="Hip" value={avatarSignals.scales.hip} />
           <AvatarScale label="Arm" value={avatarSignals.scales.arm} />
           <AvatarScale label="Thigh" value={avatarSignals.scales.thigh} />
-          <div className="rounded-2xl border border-lime-300/20 bg-lime-300/10 p-3 font-black text-lime-100">
-            {avatarSignals.readiness.completedCount}/
-            {avatarSignals.readiness.totalCount} minimum
-          </div>
         </div>
       </div>
 
-      <div className="relative mt-4 rounded-3xl border border-white/10 bg-white/[0.045] p-4">
-        <p className="text-xs font-black tracking-[0.18em] text-lime-200 uppercase">
-          Focus areas
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {targetAreaLabels.map((label) => (
-            <span
-              key={label}
-              className="rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-1 text-xs font-black text-violet-100"
-            >
-              {label}
-            </span>
-          ))}
-        </div>
+      <div className="relative mt-3 flex flex-wrap gap-2">
+        {targetAreaLabels.map((label) => (
+          <span
+            key={label}
+            className="rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-1 text-xs font-black text-violet-100"
+          >
+            {label}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -327,20 +318,15 @@ function MeasurementStrategyPanel({
   avatarSignals: AvatarSignals;
 }) {
   return (
-    <Surface className="p-6 sm:p-7">
-      <div className="flex items-start justify-between gap-4">
+    <Surface className="p-5 sm:p-6">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-black tracking-[0.18em] text-slate-400 uppercase">
-            Measurement strategy
+            Avatar input
           </p>
-          <h3 className="mt-3 text-3xl font-black tracking-tight">
-            Start small. Get precise later.
+          <h3 className="mt-2 text-2xl font-black tracking-tight">
+            Minimum first
           </h3>
-          <p className="mt-3 leading-7 text-slate-300">
-            The minimum avatar input set is height, weight, and waist. Chest,
-            hips, body fat, arm, and thigh improve precision, but they do not
-            block the user from starting.
-          </p>
         </div>
         <span className="rounded-full border border-lime-300/25 bg-lime-300/10 px-3 py-1 text-xs font-black text-lime-200">
           {avatarSignals.readiness.completedCount}/
@@ -348,31 +334,28 @@ function MeasurementStrategyPanel({
         </span>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
         {minimumAvatarMeasurements.map((measurement) => (
           <AvatarMeasurementRow
             key={measurement.id}
             label={measurement.label}
-            target={measurement.avatarUse}
             ready={
               !avatarSignals.readiness.missingMinimum.some(
                 (missing) => missing.id === measurement.id,
               )
             }
-            required
           />
         ))}
       </div>
 
       <div className="mt-4 rounded-3xl border border-violet-300/20 bg-violet-400/10 p-4">
         <p className="text-xs font-black tracking-[0.18em] text-violet-100 uppercase">
-          Optional precision fields
+          Optional precision
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-300">
           {optionalAvatarMeasurements
             .map((measurement) => measurement.label)
-            .join(", ")}{" "}
-          refine the human model when the user wants more detail.
+            .join(" · ")}
         </p>
       </div>
     </Surface>
@@ -381,21 +364,15 @@ function MeasurementStrategyPanel({
 
 function AvatarMeasurementRow({
   label,
-  target,
   ready,
-  required = false,
 }: {
   label: string;
-  target: string;
   ready: boolean;
-  required?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="font-black">
-          {label} {required && <span className="text-lime-300">*</span>}
-        </p>
+        <p className="font-black">{label}</p>
         <span
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-black",
@@ -404,19 +381,18 @@ function AvatarMeasurementRow({
               : "border-violet-300/25 bg-violet-400/10 text-violet-100",
           )}
         >
-          {ready ? "Active" : "Needed"}
+          {ready ? "Set" : "Add"}
         </span>
       </div>
-      <p className="mt-2 text-sm text-slate-400">{target}</p>
     </div>
   );
 }
 
 function AvatarScale({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/55 p-3">
+    <div className="rounded-2xl border border-white/10 bg-slate-950/55 p-2 text-center">
       <p className="font-black text-slate-200">{label}</p>
-      <p className="mt-1 font-mono text-[0.7rem] text-slate-400">
+      <p className="mt-1 font-mono text-[0.68rem] text-slate-400">
         {value.toFixed(2)}x
       </p>
     </div>

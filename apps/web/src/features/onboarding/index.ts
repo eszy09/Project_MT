@@ -1,5 +1,6 @@
-export { OnboardingFlow } from "./onboarding-flow";
+﻿export { OnboardingFlow } from "./onboarding-flow";
 export {
+  experienceLevelOptions,
   primaryGoalLabel,
   primaryGoalOptions,
   targetAreaLabel,

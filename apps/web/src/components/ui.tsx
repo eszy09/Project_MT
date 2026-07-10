@@ -5,7 +5,7 @@ export function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 type SurfaceProps = ComponentPropsWithoutRef<"div"> & {
-  tone?: "default" | "active" | "danger";
+  tone?: "default" | "active" | "danger" | "quiet";
 };
 
 export function Surface({
@@ -16,8 +16,9 @@ export function Surface({
   return (
     <div
       className={cn(
-        "rounded-[2rem] border p-6 shadow-2xl shadow-black/30 backdrop-blur",
+        "rounded-[1.75rem] border p-5 shadow-2xl shadow-black/25 backdrop-blur",
         tone === "default" && "border-white/10 bg-white/[0.045]",
+        tone === "quiet" && "border-white/8 bg-white/[0.025]",
         tone === "active" &&
           "border-lime-300/35 bg-lime-300/[0.08] shadow-lime-950/30",
         tone === "danger" && "border-red-400/30 bg-red-400/[0.08]",
@@ -35,7 +36,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-lime-300/25 bg-lime-300/10 px-3 py-1 text-xs font-bold tracking-[0.18em] text-lime-200 uppercase",
+        "inline-flex items-center rounded-full border border-lime-300/25 bg-lime-300/10 px-3 py-1 text-[0.68rem] font-black tracking-[0.18em] text-lime-200 uppercase",
         className,
       )}
       {...props}
@@ -88,12 +89,12 @@ export function StatCard({
   };
 
   return (
-    <div className={cn("rounded-3xl border p-5", accents[accent])}>
-      <p className="text-xs font-bold tracking-[0.18em] uppercase opacity-80">
+    <div className={cn("rounded-3xl border p-4", accents[accent])}>
+      <p className="text-xs font-black tracking-[0.16em] uppercase opacity-80">
         {label}
       </p>
-      <p className="mt-3 text-3xl font-black tracking-tight">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-300">{detail}</p>
+      <p className="mt-2 text-3xl font-black tracking-tight">{value}</p>
+      <p className="mt-1 text-sm leading-5 text-slate-300">{detail}</p>
     </div>
   );
 }
@@ -110,13 +111,13 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+    <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
       <div>
         <Badge>{eyebrow}</Badge>
-        <h1 className="mt-5 max-w-4xl text-5xl font-black tracking-[-0.05em] text-balance sm:text-7xl">
+        <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.05em] text-balance sm:text-6xl">
           {title}
         </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
           {description}
         </p>
       </div>
