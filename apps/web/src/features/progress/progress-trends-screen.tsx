@@ -1,16 +1,18 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Badge, Surface } from "@/components";
-import { BodyModelCard } from "@/features/body-model";
+import { BodyModelCard, type AvatarSignals } from "@/features/body-model";
 import type { ProgressTrends, TrendSeries } from "./progress-trends";
 
 export function ProgressTrendsScreen({
   trends,
   selectedDays,
   error,
+  avatarComparison,
 }: {
   trends: ProgressTrends;
   selectedDays: number;
   error?: { message: string; requestId: string | null } | null;
+  avatarComparison: AvatarComparison;
 }) {
   const series = [
     trends.weight,
@@ -76,6 +78,8 @@ export function ProgressTrendsScreen({
           )}
         </div>
       )}
+
+      <AvatarProgressComparison comparison={avatarComparison} />
 
       <BodyModelCard />
 
@@ -180,4 +184,135 @@ function chartCoordinates(points: readonly { value: number }[]) {
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
+}
+
+export type AvatarComparison = {
+  current: AvatarSignals;
+  previous: AvatarSignals | null;
+};
+
+function AvatarProgressComparison({
+  comparison,
+}: {
+  comparison: AvatarComparison;
+}) {
+  const rows = [
+    [
+      "Torso",
+      comparison.current.scales.torso,
+      comparison.previous?.scales.torso,
+    ],
+    [
+      "Waist",
+      comparison.current.scales.waist,
+      comparison.previous?.scales.waist,
+    ],
+    ["Hip", comparison.current.scales.hip, comparison.previous?.scales.hip],
+    ["Arm", comparison.current.scales.arm, comparison.previous?.scales.arm],
+    [
+      "Thigh",
+      comparison.current.scales.thigh,
+      comparison.previous?.scales.thigh,
+    ],
+  ] as const;
+
+  return (
+    <Surface className="mt-8 overflow-hidden p-6 sm:p-8">
+      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+        <div>
+          <Badge>Avatar comparison</Badge>
+          <h2 className="mt-4 text-4xl font-black tracking-[-0.04em]">
+            Current shape signals vs previous check-in
+          </h2>
+          <p className="mt-4 leading-7 text-slate-300">
+            This compares derived avatar scale signals, not exact body shape.
+            Use it as a visual context layer beside measurements and journal
+            notes.
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <AvatarStateCard label="Current" signal={comparison.current} />
+            <AvatarStateCard label="Previous" signal={comparison.previous} />
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-4">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-b border-white/10 pb-3 text-xs font-black tracking-[0.18em] text-slate-500 uppercase">
+            <span>Signal</span>
+            <span>Current</span>
+            <span>Delta</span>
+          </div>
+          <div className="mt-3 space-y-2">
+            {rows.map(([label, current, previous]) => (
+              <AvatarDeltaRow
+                key={label}
+                label={label}
+                current={current}
+                previous={previous ?? null}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Surface>
+  );
+}
+
+function AvatarStateCard({
+  label,
+  signal,
+}: {
+  label: string;
+  signal: AvatarSignals | null;
+}) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
+      <p className="text-xs font-black tracking-[0.18em] text-slate-500 uppercase">
+        {label}
+      </p>
+      {signal ? (
+        <>
+          <p className="mt-3 text-xl font-black tracking-tight">
+            {signal.confidenceLabel}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            {signal.measuredAt ? formatDate(signal.measuredAt) : "No date"}
+          </p>
+        </>
+      ) : (
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Add another check-in to compare avatar changes.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function AvatarDeltaRow({
+  label,
+  current,
+  previous,
+}: {
+  label: string;
+  current: number;
+  previous: number | null;
+}) {
+  const delta = previous === null ? null : current - previous;
+
+  return (
+    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-sm">
+      <span className="font-black">{label}</span>
+      <span className="font-mono text-slate-300">{current.toFixed(2)}x</span>
+      <span className="font-mono text-lime-200">
+        {delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(2)}`}
+      </span>
+    </div>
+  );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 }
