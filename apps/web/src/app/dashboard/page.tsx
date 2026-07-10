@@ -310,8 +310,8 @@ function JournalPanel() {
         eyebrow="Planned surface"
         title="Build journal/media UI"
         description="Add creation, browsing, and privacy-first media states once the dashboard structure is merged."
-        href="/dashboard?tab=journal"
-        action="Stay here"
+        href="/journal"
+        action="Open journal"
         tone="cyan"
       />
     </div>
