@@ -65,6 +65,11 @@ export async function createBodyCheckin(
 
   return (await response.json()) as BodyCheckin;
 }
+
+export async function getLatestBodyCheckin(): Promise<BodyCheckin | null> {
+  const checkins = await getBodyCheckins();
+  return checkins[0] ?? null;
+}
 export async function getProgressSourceData(
   from: string,
   to: string,

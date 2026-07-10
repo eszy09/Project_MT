@@ -2,9 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge, PageHeader, StatCard, Surface, cn } from "@/components";
 import { requireSession } from "@/features/auth";
-import { BodyAvatarHero } from "@/features/body-model";
+import { BodyAvatarHero, buildAvatarSignals } from "@/features/body-model";
 import { primaryGoalLabel, targetAreaLabel } from "@/features/onboarding";
-import { getOnboardingDraft } from "@/services";
+import { getLatestBodyCheckin, getOnboardingDraft } from "@/services";
+import type { BodyCheckin } from "@/services";
 
 type DashboardTab =
   "overview" | "workout" | "check-ins" | "progress" | "journal";
@@ -61,6 +62,13 @@ export default async function DashboardPage({
   const targetAreaSummary = targetAreas.join(", ").toLowerCase();
   const primaryGoal = primaryGoalLabel(profile.primaryGoal);
 
+  let latestCheckin: BodyCheckin | null = null;
+  try {
+    latestCheckin = await getLatestBodyCheckin();
+  } catch {
+    latestCheckin = null;
+  }
+  const avatarSignals = buildAvatarSignals({ profile, latestCheckin });
   return (
     <section className="w-full">
       <PageHeader
@@ -84,6 +92,7 @@ export default async function DashboardPage({
         primaryGoal={primaryGoal}
         targetAreaSummary={targetAreaSummary}
         targetAreaLabels={targetAreas}
+        avatarSignals={avatarSignals}
       />
       <nav
         aria-label="Dashboard sections"
