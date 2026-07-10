@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge, PageHeader, StatCard, Surface, cn } from "@/components";
 import { requireSession } from "@/features/auth";
-import { BodyAvatarHero, buildAvatarSignals } from "@/features/body-model";
+import { BodyAvatarHero } from "@/features/body-model";
 import { primaryGoalLabel, targetAreaLabel } from "@/features/onboarding";
 import { getLatestBodyCheckin, getOnboardingDraft } from "@/services";
 import type { BodyCheckin } from "@/services";
@@ -92,7 +92,6 @@ export default async function DashboardPage({
         primaryGoal={primaryGoal}
         targetAreaSummary={targetAreaSummary}
         targetAreaLabels={targetAreas}
-        avatarSignals={avatarSignals}
       />
       <nav
         aria-label="Dashboard sections"
